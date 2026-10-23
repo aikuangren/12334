@@ -1,0 +1,823 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <script>
+        location.replace("/h5-c.html" + location.search);
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>سحب بطاقات الكلمات</title>
+    <style>
+        :root {
+            --bg: #e9f6fc;
+            --surface: rgba(255,255,255,.82);
+            --surface-strong: #ffffff;
+            --text: #263241;
+            --muted: #6b7c8f;
+            --line: rgba(118,150,175,.22);
+            --cyan: #20d4df;
+            --shadow: 0 14px 32px rgba(70,102,130,.16);
+            --nav-h: 74px;
+        }
+        * { box-sizing: border-box; }
+        html, body { margin: 0; min-height: 100%; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", sans-serif;
+            color: var(--text);
+            background: linear-gradient(180deg, #f6fbff 0%, var(--bg) 54%, #d8eef9 100%);
+        }
+        button, input { font: inherit; }
+        button { border: 0; cursor: pointer; }
+        .app {
+            width: min(100vw, 430px);
+            min-height: 100vh;
+            margin: 0 auto;
+            padding: 18px 16px calc(var(--nav-h) + 24px);
+            position: relative;
+        }
+        .top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+        .brand h1 { margin: 0; font-size: 26px; letter-spacing: 0; }
+        .brand p { margin: 3px 0 0; color: var(--muted); font-size: 13px; }
+        .user {
+            width: 86px;
+            height: 38px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            background: rgba(255,255,255,.72);
+            color: var(--muted);
+            text-align: center;
+            outline: none;
+        }
+        .screen { display: none; }
+        .screen.active { display: block; }
+        .hero {
+            border-radius: 28px;
+            padding: 22px;
+            min-height: 210px;
+            background:
+                    radial-gradient(circle at 18% 20%, rgba(31,227,245,.38), transparent 34%),
+                    radial-gradient(circle at 80% 18%, rgba(255,255,255,.92), transparent 30%),
+                    linear-gradient(150deg, #ffe1d3 0%, #ff6447 74%);
+            box-shadow: var(--shadow);
+            color: #ffffff;
+            overflow: hidden;
+            position: relative;
+        }
+        .hero h2 { margin: 0; font-size: 24px; }
+        .pool-strip {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding: 2px 2px 12px;
+            margin: 0 -2px 10px;
+            scroll-snap-type: x mandatory;
+        }
+        .pool-strip::-webkit-scrollbar { display: none; }
+        .pool-card {
+            flex: 0 0 146px;
+            min-height: 168px;
+            border-radius: 22px;
+            padding: 10px;
+            background: rgba(255,255,255,.72);
+            border: 2px solid rgba(255,255,255,.92);
+            box-shadow: 0 8px 18px rgba(70,102,130,.1);
+            color: var(--text);
+            text-align: left;
+            scroll-snap-align: start;
+        }
+        .pool-card.selected {
+            border-color: rgba(31,227,245,.95);
+            box-shadow: 0 12px 26px rgba(31,227,245,.18);
+        }
+        .pool-card img,
+        .pool-image-fallback {
+            width: 100%;
+            aspect-ratio: 4 / 5;
+            border-radius: 16px;
+            object-fit: cover;
+            display: block;
+            background:
+                    radial-gradient(circle at 24% 24%, rgba(31,227,245,.34), transparent 36%),
+                    linear-gradient(145deg, #ffffff, #dff4fb);
+        }
+        .pool-card img.hidden { display: none; }
+        .pool-image-fallback {
+            display: grid;
+            place-items: center;
+            color: var(--muted);
+            font-weight: 900;
+            font-size: 13px;
+        }
+        .pool-card strong {
+            display: block;
+            margin-top: 9px;
+            font-size: 15px;
+            line-height: 1.2;
+            word-break: break-word;
+        }
+        .pool-card span {
+            display: block;
+            margin-top: 3px;
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 800;
+        }
+        .quota {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 20px 0 18px;
+        }
+        .quota-card {
+            border-radius: 18px;
+            padding: 12px;
+            background: rgba(255,255,255,.22);
+            backdrop-filter: blur(10px);
+        }
+        .quota-card span { display: block; font-size: 12px; opacity: .86; }
+        .quota-card strong { display: block; margin-top: 3px; font-size: 22px; }
+        .draw-btn {
+            width: 100%;
+            height: 54px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #17cfc3, #1fd7e6);
+            color: white;
+            font-weight: 900;
+            font-size: 18px;
+            box-shadow: 0 10px 24px rgba(31,215,230,.35);
+        }
+        .draw-btn:disabled {
+            background: rgba(255,255,255,.48);
+            color: rgba(38,50,65,.58);
+            box-shadow: none;
+        }
+        .section-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 22px 2px 12px;
+        }
+        .section-title h3 { margin: 0; font-size: 20px; }
+        .section-title span { color: var(--muted); font-weight: 800; }
+        .pack-preview {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+        }
+        .mini-card {
+            min-height: 96px;
+            border-radius: 16px;
+            background: rgba(255,255,255,.8);
+            border: 1px solid rgba(255,255,255,.88);
+            box-shadow: 0 8px 18px rgba(70,102,130,.11);
+            padding: 9px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .mini-card strong { font-size: 14px; line-height: 1.15; word-break: break-word; }
+        .mini-card span { color: var(--muted); font-size: 11px; }
+        .result-grid, .album-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+        .word-card {
+            min-height: 150px;
+            border-radius: 22px;
+            padding: 15px;
+            background: var(--surface-strong);
+            box-shadow: 0 10px 24px rgba(70,102,130,.12);
+            border: 1px solid rgba(255,255,255,.9);
+            overflow: hidden;
+        }
+        .word-card.locked {
+            background: rgba(255,255,255,.46);
+            border-style: dashed;
+            color: rgba(38,50,65,.34);
+            box-shadow: none;
+        }
+        .word-card.ur-template {
+            position: relative;
+            min-height: auto;
+            aspect-ratio: 941 / 1672;
+            padding: 0;
+            border: 0;
+            border-radius: 18px;
+            background: transparent;
+            box-shadow: 0 12px 26px rgba(124,58,237,.2);
+        }
+        .ur-frame-bg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            pointer-events: none;
+            user-select: none;
+        }
+        .ur-art {
+            position: absolute;
+            left: 16%;
+            right: 16%;
+            top: 36%;
+            height: 32%;
+            border-radius: 12%;
+            object-fit: cover;
+            display: block;
+            background:
+                    radial-gradient(circle at 50% 46%, rgba(255,255,255,.64), transparent 34%),
+                    linear-gradient(145deg, rgba(124,58,237,.2), rgba(255,255,255,.4));
+        }
+        .ur-art.hidden { display: none; }
+        .ur-title {
+            position: absolute;
+            left: 18%;
+            right: 18%;
+            top: 17%;
+            display: grid;
+            gap: 2px;
+            text-align: center;
+            color: #8a1852;
+            text-shadow: 0 1px 0 rgba(255,255,255,.85);
+        }
+        .ur-title strong {
+            font-size: clamp(18px, 8vw, 36px);
+            line-height: 1;
+            font-weight: 1000;
+            word-break: break-word;
+        }
+        .ur-title span {
+            color: #76526f;
+            font-size: clamp(11px, 3.6vw, 18px);
+            font-weight: 900;
+            word-break: break-word;
+        }
+        .ur-info {
+            position: absolute;
+            left: 18%;
+            right: 18%;
+            bottom: 12%;
+            display: grid;
+            gap: 5px;
+            text-align: center;
+            color: #704260;
+            font-weight: 900;
+            text-shadow: 0 1px 0 rgba(255,255,255,.8);
+        }
+        .ur-info .tag {
+            justify-self: center;
+            background: #7c3aed;
+            color: #fff;
+        }
+        .ur-info p {
+            margin: 0;
+            color: #704260;
+            font-size: clamp(11px, 3.2vw, 15px);
+            line-height: 1.25;
+        }
+        .card-image {
+            width: calc(100% + 30px);
+            margin: -15px -15px 12px;
+            aspect-ratio: 3 / 4;
+            object-fit: cover;
+            display: block;
+            background:
+                    radial-gradient(circle at 22% 20%, rgba(31,227,245,.28), transparent 34%),
+                    linear-gradient(145deg, #ffffff, #e4f5fb);
+        }
+        .card-image.hidden { display: none; }
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            height: 25px;
+            border-radius: 999px;
+            padding: 0 10px;
+            background: #40536a;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 900;
+        }
+        .new { background: #1FF529; color: #14331d; }
+        .new-SR { background: #1FE3F5; color: #07343a; }
+        .new-SSR { background: #2563eb; color: #fff; }
+        .new-UR { background: #7c3aed; color: #fff; }
+        .new-LR { background: #f97316; color: #fff; }
+        .new-XR { background: #dc2626; color: #fff; }
+        .word {
+            margin: 16px 0 4px;
+            font-size: 25px;
+            font-weight: 900;
+            line-height: 1.05;
+            word-break: break-word;
+        }
+        .meaning { color: var(--muted); font-size: 15px; }
+        .meta { margin-top: 12px; color: var(--muted); font-weight: 800; }
+        .tabs {
+            position: fixed;
+            left: 50%;
+            bottom: 0;
+            transform: translateX(-50%);
+            width: min(100vw, 430px);
+            height: calc(var(--nav-h) + env(safe-area-inset-bottom));
+            padding: 8px 16px calc(8px + env(safe-area-inset-bottom));
+            background: rgba(245,251,255,.86);
+            border-top: 1px solid var(--line);
+            backdrop-filter: blur(18px);
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            z-index: 20;
+        }
+        .tab {
+            border-radius: 18px;
+            background: transparent;
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 900;
+        }
+        .tab.active { background: #ffffff; color: var(--text); box-shadow: 0 8px 18px rgba(70,102,130,.12); }
+        .album-section { margin-bottom: 24px; }
+        .album-pool-tabs {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 0 2px 14px;
+            margin: -2px -2px 8px;
+        }
+        .album-pool-tabs::-webkit-scrollbar { display: none; }
+        .album-pool-tab {
+            flex: 0 0 auto;
+            min-width: 112px;
+            height: 44px;
+            border-radius: 999px;
+            padding: 0 16px;
+            background: rgba(255,255,255,.72);
+            border: 1px solid rgba(255,255,255,.9);
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 900;
+            box-shadow: 0 7px 16px rgba(70,102,130,.1);
+        }
+        .album-pool-tab.selected {
+            color: #07343a;
+            background: #1FE3F5;
+            border-color: rgba(31,227,245,.95);
+            box-shadow: 0 10px 22px rgba(31,227,245,.24);
+        }
+        .album-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2px 10px;
+        }
+        .album-head strong { font-size: 20px; }
+        .album-head span { color: var(--muted); font-weight: 900; }
+        .history-list { display: grid; gap: 12px; }
+        .history-item {
+            border-radius: 20px;
+            padding: 15px;
+            background: var(--surface);
+            border: 1px solid rgba(255,255,255,.88);
+            box-shadow: 0 8px 18px rgba(70,102,130,.1);
+        }
+        .history-item header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: 900;
+        }
+        .history-cards {
+            display: flex;
+            gap: 7px;
+            overflow: hidden;
+        }
+        .history-chip {
+            flex: 1;
+            min-width: 0;
+            border-radius: 12px;
+            padding: 8px 6px;
+            background: rgba(255,255,255,.72);
+            font-size: 11px;
+            text-align: center;
+            color: var(--muted);
+        }
+        .sheet {
+            position: fixed;
+            inset: 0;
+            z-index: 40;
+            display: none;
+            align-items: end;
+            background: rgba(18,30,44,.28);
+        }
+        .sheet.active { display: flex; }
+        .sheet-body {
+            width: min(100vw, 430px);
+            margin: 0 auto;
+            max-height: 86vh;
+            overflow: auto;
+            border-radius: 30px 30px 0 0;
+            padding: 18px 16px 24px;
+            background: linear-gradient(180deg, #f8fcff, #e8f5fc);
+            box-shadow: 0 -18px 34px rgba(24,44,64,.18);
+        }
+        .sheet-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+        .sheet-top h3 { margin: 0; font-size: 22px; }
+        .close {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #ffffff;
+            color: var(--muted);
+            font-size: 24px;
+            box-shadow: 0 8px 18px rgba(70,102,130,.14);
+        }
+        .toast {
+            position: fixed;
+            left: 50%;
+            bottom: calc(var(--nav-h) + 18px);
+            transform: translateX(-50%);
+            z-index: 60;
+            max-width: min(360px, calc(100vw - 32px));
+            border-radius: 999px;
+            padding: 11px 16px;
+            background: rgba(38,50,65,.92);
+            color: #fff;
+            font-weight: 800;
+            display: none;
+        }
+        .toast.active { display: block; }
+    </style>
+</head>
+<body>
+<main class="app">
+    <div class="top">
+        <div class="brand">
+            <h1>بطاقات الكلمات</h1>
+            <p id="subtitle">السحب متاح اليوم</p>
+        </div>
+        <input id="userId" class="user" inputmode="numeric" aria-label="معرّف المستخدم">
+    </div>
+
+    <section id="home" class="screen active">
+        <div class="section-title" style="margin-top:0;">
+            <h3>اختر مجموعة البطاقات</h3>
+            <span id="poolCount">-</span>
+        </div>
+        <div id="poolStrip" class="pool-strip"></div>
+
+        <div class="hero">
+            <h2 id="heroTitle">افتح حزمة بطاقات الكلمات</h2>
+            <div class="quota">
+                <div class="quota-card"><span>مجاني</span><strong id="freeQuota">-</strong></div>
+                <div class="quota-card"><span>إضافي</span><strong id="extraQuota">-</strong></div>
+                <div class="quota-card"><span>متاح</span><strong id="availableQuota">-</strong></div>
+            </div>
+            <button id="drawBtn" class="draw-btn">اسحب حزمة</button>
+        </div>
+
+        <div class="section-title">
+            <h3>مواضع هذه الحزمة</h3>
+            <span>5 بطاقة</span>
+        </div>
+        <div class="pack-preview">
+            <div class="mini-card"><strong>1</strong><span>N / R / SR</span></div>
+            <div class="mini-card"><strong>2</strong><span>N / R / SR</span></div>
+            <div class="mini-card"><strong>3</strong><span>N / R / SR</span></div>
+            <div class="mini-card"><strong>4</strong><span>R / SR / SSR</span></div>
+            <div class="mini-card"><strong>5</strong><span>SR+</span></div>
+        </div>
+
+        <div class="section-title">
+            <h3>آخر البطاقات</h3>
+            <span id="latestCount">0</span>
+        </div>
+        <div id="latestCards" class="result-grid"></div>
+    </section>
+
+    <section id="album" class="screen">
+        <div class="section-title">
+            <h3>ألبومي</h3>
+            <span id="albumTotal">-</span>
+        </div>
+        <div id="albumPoolTabs" class="album-pool-tabs"></div>
+        <div id="albumList"></div>
+    </section>
+
+    <section id="history" class="screen">
+        <div class="section-title">
+            <h3>سجل السحب</h3>
+            <span id="historyTotal">-</span>
+        </div>
+        <div id="historyList" class="history-list"></div>
+    </section>
+</main>
+
+<nav class="tabs">
+    <button class="tab active" data-tab="home">السحب</button>
+    <button class="tab" data-tab="album">الألبوم</button>
+    <button class="tab" data-tab="history">السجل</button>
+</nav>
+
+<section id="resultSheet" class="sheet" aria-hidden="true">
+    <div class="sheet-body">
+        <div class="sheet-top">
+            <h3>نتيجة السحب</h3>
+            <button class="close" id="closeResult">×</button>
+        </div>
+        <div id="resultCards" class="result-grid"></div>
+    </div>
+</section>
+
+<div id="toast" class="toast"></div>
+
+<script>
+    const rarityOrder = ["XR", "LR", "UR", "SSR", "SR", "R", "N"];
+    const $ = (id) => document.getElementById(id);
+    const query = new URLSearchParams(location.search);
+    const initialUserId = query.get("userId") || localStorage.getItem("cardDrawUserId") || "10001";
+    $("userId").value = initialUserId;
+
+    let activity = null;
+    let latestCards = [];
+    let pools = [];
+    let selectedPoolVersion = query.get("poolVersion") || localStorage.getItem("cardDrawPoolVersion") || "";
+
+    function currentUserId() {
+        const value = $("userId").value.trim() || "10001";
+        localStorage.setItem("cardDrawUserId", value);
+        return value;
+    }
+
+    function currentPool() {
+        return pools.find(pool => pool.version === selectedPoolVersion) || pools[0] || null;
+    }
+
+    function poolParam(prefix = "&") {
+        const pool = currentPool();
+        return pool ? `${prefix}poolVersion=${encodeURIComponent(pool.version)}` : "";
+    }
+
+    async function api(path, options = {}) {
+        const res = await fetch(path, options);
+        const json = await res.json();
+        if (!json.success) throw new Error(json.message || "فشل الطلب");
+        return json.data;
+    }
+
+    function toast(message) {
+        $("toast").textContent = message;
+        $("toast").classList.add("active");
+        window.clearTimeout(toast.timer);
+        toast.timer = window.setTimeout(() => $("toast").classList.remove("active"), 1800);
+    }
+
+    function tagClass(card) {
+        return card.isNew ? `tag new new-${card.rarity}` : "tag";
+    }
+
+    function fallbackCdnImage(img) {
+        const cdnPrefix = "https://cdn.51talkjr.com/";
+        if (img.src.startsWith(cdnPrefix)) {
+            img.src = "/" + img.src.slice(cdnPrefix.length);
+            return;
+        }
+        img.classList.add("hidden");
+    }
+
+    function cardImage(card) {
+        if (!card.imageUrl) return "";
+        return `<img class="card-image" src="${card.imageUrl}" alt="${card.word}" loading="lazy" onerror="fallbackCdnImage(this)">`;
+    }
+
+    function renderUrCard(card) {
+        return `
+            <article class="word-card ur-template">
+                <img class="ur-frame-bg" src="/assets/card-frames/ur-card-frame.png" alt="UR card frame" loading="lazy">
+                ${card.imageUrl ? `<img class="ur-art" src="${card.imageUrl}" alt="${card.word}" loading="lazy" onerror="fallbackCdnImage(this)">` : ""}
+                <div class="ur-title">
+                    <strong>${card.word}</strong>
+                    <span>${card.meaning || ""}</span>
+                </div>
+                <div class="ur-info">
+                    <span class="${tagClass(card)}">${card.rarity}${card.isNew ? " بطاقة جديدة" : ""}</span>
+                    <p>مملوك ${card.ownedCount ?? 0}</p>
+                </div>
+            </article>
+        `;
+    }
+
+    function renderCard(card, options = {}) {
+        const locked = options.locked;
+        if (locked) {
+            return `
+                <article class="word-card locked">
+                    <span class="tag">${card.rarity}</span>
+                    <div class="word">غير مجمعة</div>
+                    <div class="meaning">بانتظار الجمع</div>
+                </article>
+            `;
+        }
+        if (card.rarity === "UR") {
+            return renderUrCard(card);
+        }
+        return `
+            <article class="word-card">
+                ${cardImage(card)}
+                <span class="${tagClass(card)}">${card.rarity}${card.isNew ? " بطاقة جديدة" : ""}</span>
+                <div class="word">${card.word}</div>
+                <div class="meaning">${card.meaning || ""}</div>
+                <div class="meta">مملوك ${card.ownedCount ?? 0}</div>
+            </article>
+        `;
+    }
+
+    function updateQuota(quota) {
+        const pool = currentPool();
+        $("freeQuota").textContent = quota?.freeQuota ?? "-";
+        $("extraQuota").textContent = quota?.extraQuota ?? "-";
+        $("availableQuota").textContent = quota?.availableQuota ?? "-";
+        $("subtitle").textContent = pool ? `${pool.name}｜${quota?.quotaDate ? `تاريخ المحاكاة ${quota.quotaDate}` : "السحب متاح اليوم"}` : "يرجى اختيار مجموعة البطاقات";
+        $("heroTitle").textContent = pool ? `افتح ${pool.name}` : "لا توجد مجموعة بطاقات متاحة";
+        $("drawBtn").disabled = !quota || quota.availableQuota <= 0;
+    }
+
+    async function loadPools() {
+        pools = await api("/api/card-draw/pools");
+        if (!pools.length) {
+            $("poolCount").textContent = "0";
+            $("poolStrip").innerHTML = `<button class="pool-card selected"><div class="pool-image-fallback">لا توجد مجموعة بطاقات</div><strong>لا توجد مجموعة بطاقات متاحة</strong><span>يرجى تفعيل مجموعة البطاقات أولًا</span></button>`;
+            renderAlbumPoolTabs();
+            $("drawBtn").disabled = true;
+            return;
+        }
+        if (!pools.some(pool => pool.version === selectedPoolVersion)) {
+            selectedPoolVersion = pools[0].version;
+        }
+        localStorage.setItem("cardDrawPoolVersion", selectedPoolVersion);
+        renderPools();
+        renderAlbumPoolTabs();
+    }
+
+    function renderPools() {
+        $("poolCount").textContent = `${pools.length}`;
+        $("poolStrip").innerHTML = pools.map(pool => `
+            <button class="pool-card ${pool.version === selectedPoolVersion ? "selected" : ""}" data-pool-version="${pool.version}">
+                ${pool.packImageUrl
+                    ? `<img src="${pool.packImageUrl}" alt="${pool.name}" onerror="fallbackCdnImage(this)">`
+                    : `<div class="pool-image-fallback">حزمة البطاقات</div>`}
+                <strong>${pool.name}</strong>
+                <span>${pool.version}</span>
+            </button>
+        `).join("");
+    }
+
+    function renderAlbumPoolTabs() {
+        if (!pools.length) {
+            $("albumPoolTabs").innerHTML = `<button class="album-pool-tab selected">لا توجد مجموعة بطاقات</button>`;
+            return;
+        }
+        $("albumPoolTabs").innerHTML = pools.map(pool => `
+            <button class="album-pool-tab ${pool.version === selectedPoolVersion ? "selected" : ""}" data-pool-version="${pool.version}">
+                ${pool.name}
+            </button>
+        `).join("");
+    }
+
+    async function selectPool(version) {
+        if (selectedPoolVersion === version) return;
+        selectedPoolVersion = version;
+        localStorage.setItem("cardDrawPoolVersion", selectedPoolVersion);
+        renderPools();
+        renderAlbumPoolTabs();
+        showLatest([]);
+        await activateTab(document.querySelector(".screen.active").id);
+    }
+
+    async function loadActivity() {
+        if (!currentPool()) {
+            updateQuota(null);
+            return;
+        }
+        activity = await api(`/api/card-draw/activity?userId=${currentUserId()}${poolParam()}`);
+        updateQuota(activity.quota);
+    }
+
+    function showLatest(cards) {
+        latestCards = cards || [];
+        $("latestCount").textContent = latestCards.length;
+        $("latestCards").innerHTML = latestCards.length
+            ? latestCards.slice(0, 4).map(renderCard).join("")
+            : `<article class="word-card locked"><div class="word">لا يوجد</div><div class="meaning">تظهر بعد سحب حزمة</div></article>`;
+    }
+
+    async function drawPack() {
+        try {
+            if (!currentPool()) {
+                toast("لا توجد مجموعة بطاقات متاحة");
+                return;
+            }
+            $("drawBtn").disabled = true;
+            const data = await api(`/api/card-draw/draw?userId=${currentUserId()}${poolParam()}`, { method: "POST" });
+            updateQuota(data.quota);
+            showLatest(data.cards);
+            $("resultCards").innerHTML = data.cards.map(renderCard).join("");
+            $("resultSheet").classList.add("active");
+            $("resultSheet").setAttribute("aria-hidden", "false");
+        } catch (error) {
+            toast(error.message);
+            await loadActivity().catch(() => {});
+        }
+    }
+
+    async function loadAlbum() {
+        renderAlbumPoolTabs();
+        if (!currentPool()) {
+            $("albumTotal").textContent = "-";
+            $("albumList").innerHTML = `<article class="word-card locked"><div class="word">لا توجد مجموعة بطاقات</div><div class="meaning">يرجى تفعيل مجموعة البطاقات أولًا</div></article>`;
+            return;
+        }
+        const data = await api(`/api/card-draw/my-cards?userId=${currentUserId()}${poolParam()}`);
+        $("albumTotal").textContent = `${data.obtainedCardCount}/${data.totalCardCount}`;
+        $("albumList").innerHTML = rarityOrder.map(rarity => {
+            const cards = data.cards.filter(card => card.rarity === rarity);
+            const progress = data.rarityProgress[rarity] || { obtained: 0, total: cards.length };
+            return `
+                <section class="album-section">
+                    <div class="album-head"><strong>${rarity}</strong><span>${progress.obtained}/${progress.total}</span></div>
+                    <div class="album-grid">
+                        ${cards.map(card => renderCard(card, { locked: card.ownedCount <= 0 })).join("")}
+                    </div>
+                </section>
+            `;
+        }).join("");
+    }
+
+    async function loadHistory() {
+        if (!currentPool()) {
+            $("historyTotal").textContent = "-";
+            $("historyList").innerHTML = `<article class="history-item">يرجى تفعيل مجموعة البطاقات أولًا</article>`;
+            return;
+        }
+        const data = await api(`/api/card-draw/history?userId=${currentUserId()}${poolParam()}`);
+        $("historyTotal").textContent = `${data.length}`;
+        $("historyList").innerHTML = data.length ? data.map(order => `
+            <article class="history-item">
+                <header><span>رقم ${order.drawNo} حزمة</span><span>${order.hasNewCard ? "توجد بطاقة جديدة" : "لا توجد بطاقة جديدة"}</span></header>
+                <div class="history-cards">
+                    ${order.cards.map(card => `<div class="history-chip">${card.rarity}<br>${card.word}</div>`).join("")}
+                </div>
+            </article>
+        `).join("") : `<article class="history-item">لا يوجد سجل سحب</article>`;
+    }
+
+    async function activateTab(name) {
+        document.querySelectorAll(".screen").forEach(screen => screen.classList.toggle("active", screen.id === name));
+        document.querySelectorAll(".tab").forEach(tab => tab.classList.toggle("active", tab.dataset.tab === name));
+        if (name === "album") await loadAlbum().catch(error => toast(error.message));
+        if (name === "history") await loadHistory().catch(error => toast(error.message));
+        if (name === "home") await loadActivity().catch(error => toast(error.message));
+    }
+
+    document.querySelectorAll(".tab").forEach(tab => {
+        tab.addEventListener("click", () => activateTab(tab.dataset.tab));
+    });
+    $("poolStrip").addEventListener("click", event => {
+        const button = event.target.closest("button[data-pool-version]");
+        if (!button) return;
+        selectPool(button.dataset.poolVersion).catch(error => toast(error.message));
+    });
+    $("albumPoolTabs").addEventListener("click", event => {
+        const button = event.target.closest("button[data-pool-version]");
+        if (!button) return;
+        selectPool(button.dataset.poolVersion).catch(error => toast(error.message));
+    });
+    $("drawBtn").addEventListener("click", drawPack);
+    $("closeResult").addEventListener("click", () => {
+        $("resultSheet").classList.remove("active");
+        $("resultSheet").setAttribute("aria-hidden", "true");
+    });
+    $("userId").addEventListener("change", async () => {
+        showLatest([]);
+        await activateTab(document.querySelector(".screen.active").id);
+    });
+
+    showLatest([]);
+    loadPools().then(loadActivity).catch(error => toast(error.message));
+</script>
+</body>
+</html>

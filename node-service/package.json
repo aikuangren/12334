@@ -1,0 +1,17 @@
+{
+  "name": "card-draw-node-service",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Lightweight Node.js card draw API service for the card collection H5.",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test test/*.test.js"
+  },
+  "dependencies": {
+    "@fastify/cors": "^10.0.1",
+    "dotenv": "^16.4.7",
+    "fastify": "^5.2.1",
+    "mysql2": "^3.12.0"
+  }
+}

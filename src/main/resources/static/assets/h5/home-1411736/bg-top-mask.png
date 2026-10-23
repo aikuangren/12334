@@ -1,0 +1,24 @@
+<svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible" style="display: block;" viewBox="0 0 1171.75 815" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Mask group">
+<rect id="Rectangle 346244253" x="120.472" y="334" width="750" height="481" fill="url(#paint0_linear_0_141)"/>
+<g id="Ellipse 346" filter="url(#filter0_f_0_141)">
+<path d="M1013.96 528.472C976.597 596.965 815.433 581.102 653.988 493.041C492.543 404.979 115.225 412.278 152.585 343.785C189.945 275.292 627.835 156.944 789.28 245.006C950.726 333.067 1051.32 459.979 1013.96 528.472Z" fill="url(#paint1_linear_0_141)" fill-opacity="0.7"/>
+</g>
+</g>
+<defs>
+<filter id="filter0_f_0_141" x="5.72205e-06" y="63.6532" width="1171.75" height="657.38" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="75" result="effect1_foregroundBlur_0_141"/>
+</filter>
+<linearGradient id="paint0_linear_0_141" x1="454.472" y1="278" x2="452.972" y2="786.5" gradientUnits="userSpaceOnUse">
+<stop stop-color="#9BE0FF"/>
+<stop offset="0.702161" stop-color="#EDF3FF" stop-opacity="0"/>
+<stop offset="1" stop-color="#EDF3FF" stop-opacity="0"/>
+</linearGradient>
+<linearGradient id="paint1_linear_0_141" x1="852.972" y1="335.5" x2="752.472" y2="573.5" gradientUnits="userSpaceOnUse">
+<stop stop-color="#C6AFFF"/>
+<stop offset="1" stop-color="#CDCFFF" stop-opacity="0.4"/>
+</linearGradient>
+</defs>
+</svg>

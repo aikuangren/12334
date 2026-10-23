@@ -1,0 +1,10 @@
+-- Intentionally no-op.
+--
+-- Existing draw_slot_rule rows may have been adjusted manually in the admin UI, and
+-- card_pool.version is mutable, so this migration cannot safely identify the
+-- intended production v1 pool without risking silent overwrites or missed pools.
+--
+-- New/default v1 probabilities are defined in DefaultDrawSlotRules and the static
+-- card-pool JSON files. For an existing production pool, update slot rules only
+-- after confirming the target pool and current values in the admin UI or with an
+-- environment-specific, reviewed SQL script.

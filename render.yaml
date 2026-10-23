@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: card-draw-backend
+    env: docker
+    plan: free
+    autoDeploy: false
+    healthCheckPath: /api/ping
+    envVars:
+      - key: TZ
+        value: Asia/Shanghai

@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>منصة اختبار نموذج السحب</title>
+    <style>
+        :root {
+            --bg: #e7f4fc;
+            --surface: rgba(255, 255, 255, .78);
+            --text: #263241;
+            --muted: #667789;
+            --cyan: #27d6dc;
+            --pink: #e83a7e;
+            --line: rgba(124, 157, 181, .24);
+            --shadow: 0 14px 34px rgba(77, 110, 138, .18);
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", sans-serif;
+            color: var(--text);
+            background: linear-gradient(180deg, #f5fbff 0%, var(--bg) 58%, #d9ecf8 100%);
+        }
+        header {
+            padding: 32px 40px 24px;
+            background: rgba(255,255,255,.5);
+            border-bottom: 1px solid var(--line);
+            position: sticky;
+            top: 0;
+            backdrop-filter: blur(16px);
+            z-index: 10;
+        }
+        h1 { margin: 0 0 8px; font-size: 30px; }
+        p { margin: 0; color: var(--muted); line-height: 1.7; }
+        main {
+            padding: 28px 40px 48px;
+            display: grid;
+            grid-template-columns: 380px minmax(0, 1fr);
+            gap: 24px;
+            align-items: start;
+        }
+        .panel {
+            background: var(--surface);
+            border: 1px solid rgba(255,255,255,.88);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            padding: 22px;
+            align-self: start;
+        }
+        .panel h2 { margin: 0 0 16px; font-size: 20px; }
+        .stack { display: grid; gap: 16px; align-content: start; }
+        label { display: grid; gap: 8px; color: var(--muted); font-size: 14px; }
+        .hint {
+            margin-top: -10px;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+        input, select {
+            height: 42px;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 0 14px;
+            font-size: 16px;
+            color: var(--text);
+            background: rgba(255,255,255,.78);
+            outline: none;
+        }
+        button {
+            height: 44px;
+            border: 0;
+            border-radius: 999px;
+            color: white;
+            background: linear-gradient(135deg, #18c9bd, #27d6dc);
+            font-size: 15px;
+            font-weight: 700;
+            box-shadow: 0 10px 20px rgba(39, 214, 220, .24);
+            cursor: pointer;
+        }
+        button.secondary {
+            color: var(--text);
+            background: rgba(255,255,255,.86);
+            box-shadow: 0 8px 18px rgba(84,119,145,.14);
+        }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(154px, 1fr)); gap: 14px; }
+        .card-groups { display: grid; gap: 22px; }
+        .rarity-section { display: grid; gap: 12px; }
+        .rarity-section:last-child { margin-bottom: 0; }
+        .rarity-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 0 2px;
+            color: var(--muted);
+            font-weight: 800;
+        }
+        .rarity-title strong { color: var(--text); font-size: 18px; }
+        .card {
+            min-height: 132px;
+            border-radius: 18px;
+            padding: 16px;
+            background: rgba(255,255,255,.74);
+            border: 1px solid rgba(255,255,255,.86);
+            box-shadow: 0 8px 18px rgba(84,119,145,.13);
+        }
+        .rarity {
+            display: inline-flex;
+            align-items: center;
+            height: 24px;
+            border-radius: 999px;
+            padding: 0 10px;
+            background: #40536a;
+            color: white;
+            font-size: 12px;
+            font-weight: 800;
+        }
+        .new { background: #1FF529; }
+        .new-SR { background: #1FE3F5; }
+        .new-SSR { background: #2563eb; }
+        .new-UR { background: #7c3aed; }
+        .new-LR { background: #f97316; }
+        .new-XR { background: #dc2626; }
+        .word { margin-top: 12px; font-size: 22px; font-weight: 800; }
+        .meaning { margin-top: 4px; color: var(--muted); }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+        }
+        .stat {
+            border-radius: 16px;
+            padding: 14px;
+            background: rgba(255,255,255,.72);
+            border: 1px solid rgba(255,255,255,.86);
+        }
+        .stat strong { display: block; font-size: 24px; margin-top: 6px; }
+        pre {
+            margin: 0;
+            max-height: 420px;
+            overflow: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-size: 13px;
+            line-height: 1.55;
+            color: #334155;
+        }
+        .ok { color: #128c7e; font-weight: 800; }
+        .bad { color: var(--pink); font-weight: 800; }
+        @media (max-width: 900px) {
+            header, main { padding-left: 18px; padding-right: 18px; }
+            main { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1>منصة اختبار نموذج السحب</h1>
+    <p>مخصصة لاختبار المنتج: يمكن اختبار السحب والألبوم والسجل ومحاكاة الاحتمالات دون قراءة الكود. قاعدة التطوير الحالية H2 وستتم إعادة بيانات العينة بعد إعادة التشغيل.</p>
+</header>
+<main>
+    <section class="panel stack">
+        <h2>منطقة العمليات</h2>
+        <label>معرّف مستخدم الاختبار
+            <input id="userId" value="10001">
+        </label>
+        <label>اختر مجموعة البطاقات
+            <select id="poolSelect"></select>
+        </label>
+        <p class="hint" id="poolHint">سيتم تنفيذ السحب والألبوم والسجل ومحاكاة الاحتمالات حسب المجموعة المختارة حاليًا.</p>
+        <button onclick="loadActivity()">عرض النشاط/المحاولات</button>
+        <button onclick="draw()">اسحب حزمة</button>
+        <button class="secondary" onclick="simulateNextDay()">محاكاة اليوم التالي</button>
+        <button class="secondary" onclick="resetByCourse()">محاكاة إعادة الضبط بعد إكمال الدرس</button>
+        <button class="secondary" onclick="gainByPractice()">محاكاة إضافة محاولات من التدريب</button>
+        <button class="secondary" onclick="loadCards()">عرض ألبومي</button>
+        <button class="secondary" onclick="loadHistory()">عرض سجل السحب</button>
+        <label>عدد الحزم للمحاكاة
+            <input id="packs" type="number" value="10000" min="1" max="100000">
+        </label>
+        <button onclick="runSimulation()">تشغيل تقرير محاكاة الاحتمالات</button>
+    </section>
+
+    <section class="stack">
+        <div class="panel">
+            <h2>الحالة الحالية</h2>
+            <div id="status" class="stats"></div>
+        </div>
+        <div class="panel">
+            <h2>نتيجة السحب</h2>
+            <div id="drawResult" class="grid"></div>
+        </div>
+        <div class="panel">
+            <h2>الألبوم/السجل/تقرير المحاكاة</h2>
+            <pre id="output">اضغط زرًا من اليسار لبدء الاختبار.</pre>
+        </div>
+    </section>
+</main>
+<script>
+    const $ = (id) => document.getElementById(id);
+    const userId = () => $("userId").value.trim() || "10001";
+    const poolVersion = () => $("poolSelect").value;
+    const poolParam = () => poolVersion() ? `&poolVersion=${encodeURIComponent(poolVersion())}` : "";
+    const statusText = {ONLINE: "متاح", OFFLINE: "غير متاح", DRAFT: "مسودة"};
+    let pools = [];
+
+    async function request(path, options = {}) {
+        const res = await fetch(path, options);
+        const json = await res.json();
+        if (!json.success) throw new Error(json.message || "فشل الطلب");
+        return json.data;
+    }
+
+    function showOutput(data) {
+        $("output").textContent = typeof data === "string" ? data : JSON.stringify(data, null, 2);
+    }
+
+    function showStatus(quota, extra = {}) {
+        $("status").innerHTML = [
+            ["مجموعة البطاقات الحالية", currentPoolName()],
+            ["تاريخ المحاكاة", quota?.quotaDate ?? "-"],
+            ["المحاولات المجانية", quota?.freeQuota ?? "-"],
+            ["المحاولات الإضافية", quota?.extraQuota ?? "-"],
+            ["المحاولات المتاحة", quota?.availableQuota ?? "-"],
+            ["المستخدم اليوم", quota?.usedToday ?? "-"],
+            ...Object.entries(extra)
+        ].map(([label, value]) => `<div class="stat"><span>${label}</span><strong>${value}</strong></div>`).join("");
+    }
+
+    function currentPoolName() {
+        const pool = pools.find(item => item.version === poolVersion());
+        return pool ? `${pool.name} (${statusText[pool.status] || pool.status})` : "-";
+    }
+
+    async function loadPools() {
+        pools = await request("/admin/card-draw/pools");
+        const savedVersion = localStorage.getItem("prototypePoolVersion");
+        if (!pools.length) {
+            $("poolSelect").innerHTML = `<option value="">لا توجد مجموعة بطاقات</option>`;
+            $("poolHint").textContent = "يرجى إضافة مجموعة بطاقات من لوحة الإدارة أولًا.";
+            return;
+        }
+        $("poolSelect").innerHTML = pools.map(pool => `
+            <option value="${pool.version}">
+                ${pool.name} (${pool.version} | ${statusText[pool.status] || pool.status} | ${pool.cardCount ?? 0} بطاقة)
+            </option>
+        `).join("");
+        if (savedVersion && pools.some(pool => pool.version === savedVersion)) {
+            $("poolSelect").value = savedVersion;
+        }
+        updatePoolHint();
+    }
+
+    function updatePoolHint() {
+        const pool = pools.find(item => item.version === poolVersion());
+        if (!pool) {
+            $("poolHint").textContent = "يرجى اختيار مجموعة البطاقات للاختبار.";
+            return;
+        }
+        $("poolHint").textContent = pool.status === "ONLINE"
+            ? `سيتم استخدام "${pool.name}" لاختبار السحب.`
+            : `مجموعة البطاقات الحالية في حالة "${statusText[pool.status] || pool.status}"؛ يمكن عرض الإعدادات. للسحب، يرجى تغييرها إلى متاحة من لوحة الإدارة.`;
+    }
+
+    function showCards(cards) {
+        $("drawResult").className = "grid";
+        $("drawResult").innerHTML = cards.map(card => `
+            <article class="card">
+                <span class="rarity ${card.isNew ? `new new-${card.rarity}` : ""}">${card.rarity}${card.isNew ? " بطاقة جديدة" : ""}</span>
+                <div class="word">${card.word}</div>
+                <div class="meaning">${card.meaning || ""}</div>
+                <p>الموضع: ${card.slotNo || "-"}  | مملوك: ${card.ownedCount ?? "-"}</p>
+            </article>
+        `).join("");
+    }
+
+    function showGroupedCards(cards, rarityProgress = {}) {
+        const rarityOrder = ["XR", "LR", "UR", "SSR", "SR", "R", "N"];
+        const ownedCards = cards
+            .filter(card => card.ownedCount > 0)
+            .sort((a, b) => {
+                const rarityDiff = rarityOrder.indexOf(a.rarity) - rarityOrder.indexOf(b.rarity);
+                if (rarityDiff !== 0) return rarityDiff;
+                return (a.cardId ?? 0) - (b.cardId ?? 0);
+            });
+        $("drawResult").className = "card-groups";
+        $("drawResult").innerHTML = rarityOrder.map(rarity => {
+            const group = ownedCards.filter(card => card.rarity === rarity);
+            const progress = rarityProgress[rarity] || {};
+            const obtained = progress.obtained ?? group.length;
+            const total = progress.total ?? cards.filter(card => card.rarity === rarity).length;
+            return `
+                <section class="rarity-section">
+                    <div class="rarity-title"><strong>${rarity}</strong><span>${obtained}/${total}</span></div>
+                    <div class="grid">
+                        ${group.length === 0 ? `
+                            <article class="card">
+                                <div class="word">لا يوجد</div>
+                                <div class="meaning">لم يتم جمع هذه الندرة بعد</div>
+                            </article>
+                        ` : group.map(card => `
+                            <article class="card">
+                                <span class="rarity">${card.rarity}</span>
+                                <div class="word">${card.word}</div>
+                                <div class="meaning">${card.meaning || ""}</div>
+                                <p>مملوك：${card.ownedCount ?? 0}</p>
+                            </article>
+                        `).join("")}
+                    </div>
+                </section>
+            `;
+        }).join("");
+    }
+
+    async function refreshActivityStatus(extra = {}) {
+        const data = await request(`/api/card-draw/activity?userId=${userId()}${poolParam()}`);
+        showStatus(data.quota, {...extra, "إجمالي السحب": data.totalDrawCount ?? 0});
+        return data;
+    }
+
+    async function loadActivity() {
+        try {
+            const data = await refreshActivityStatus({"الزر": "جاري التحميل"});
+            showStatus(data.quota, {"الزر": data.buttonText, "إجمالي السحب": data.totalDrawCount ?? 0});
+            showOutput(data);
+        } catch (e) { showOutput(e.message); }
+    }
+
+    async function draw() {
+        try {
+            const data = await request(`/api/card-draw/draw?userId=${userId()}${poolParam()}`, {method: "POST"});
+            showStatus(data.quota, {"بطاقة جديدة": data.hasNewCard ? "نعم" : "لا", "إجمالي السحب": data.totalDrawCount ?? "-"});
+            showCards(data.cards);
+            showOutput(data);
+        } catch (e) { showOutput(e.message); }
+    }
+
+    async function resetByCourse() {
+        try {
+            const data = await request(`/api/card-draw/reset-by-course?userId=${userId()}`, {method: "POST"});
+            await refreshActivityStatus({"إعادة ضبط إكمال الدرس": "تم التفعيل"});
+            showOutput(data);
+        } catch (e) { showOutput(e.message); }
+    }
+
+    async function gainByPractice() {
+        try {
+            const data = await request(`/api/card-draw/gain-by-practice?userId=${userId()}`, {method: "POST"});
+            await refreshActivityStatus({"إضافة محاولة من التدريب": "تم التفعيل"});
+            showOutput(data);
+        } catch (e) { showOutput(e.message); }
+    }
+
+    async function simulateNextDay() {
+        try {
+            const data = await request(`/api/card-draw/simulate-next-day?userId=${userId()}`, {method: "POST"});
+            await refreshActivityStatus({"محاكاة اليوم التالي": "تم التفعيل"});
+            showOutput({
+                message: "تم الانتقال إلى اليوم التالي في المحاكاة، وتمت إعادة تعيين المحاولات المجانية. سيبقى الألبوم وسجل السحب محفوظين.",
+                quota: data
+            });
+        } catch (e) { showOutput(e.message); }
+    }
+
+    async function loadCards() {
+        try {
+            const data = await request(`/api/card-draw/my-cards?userId=${userId()}${poolParam()}`);
+            showGroupedCards(data.cards, data.rarityProgress);
+            showOutput(data);
+        } catch (e) { showOutput(e.message); }
+    }
+
+    async function loadHistory() {
+        try {
+            const data = await request(`/api/card-draw/history?userId=${userId()}${poolParam()}`);
+            showOutput(data);
+        } catch (e) { showOutput(e.message); }
+    }
+
+    async function runSimulation() {
+        try {
+            const data = await request(`/api/card-draw/simulation?packs=${$("packs").value || 10000}${poolParam()}`);
+            const pass = data.ruleCheck.invalidPackCount === 0;
+            showStatus(null, {
+                "عدد الحزم للمحاكاة": data.packs,
+                "تحقق القواعد": pass ? "ناجح" : "غير طبيعي",
+                "تقدم الجمع": `${data.uniqueCardsObtained}/${data.totalCardsInPool}`
+            });
+            $("drawResult").className = "grid";
+            $("drawResult").innerHTML = Object.entries(data.rarityRates).map(([rarity, rate]) => `
+                <article class="card">
+                    <span class="rarity">${rarity}</span>
+                    <div class="word">${rate}%</div>
+                    <div class="meaning">الناتج ${data.rarityCounts[rarity]} بطاقة</div>
+                </article>
+            `).join("");
+            showOutput(data);
+        } catch (e) { showOutput(e.message); }
+    }
+
+    $("poolSelect").addEventListener("change", () => {
+        localStorage.setItem("prototypePoolVersion", poolVersion());
+        updatePoolHint();
+        $("drawResult").innerHTML = "";
+        loadActivity().catch(e => showOutput(e.message));
+    });
+    loadPools().then(loadActivity).catch(e => showOutput(e.message));
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+target/
+.m2repo/
+.runtime-local/
+.runtime/
+
+.idea/
+.vscode/
+.DS_Store
+
+*.log
+*.tmp
+*.bak
+
+.env
+.env.*
+
+build_worldcup_rarity.mjs

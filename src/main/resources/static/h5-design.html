@@ -1,0 +1,1324 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>تصميم عالي الدقة لتجربة سحب البطاقات H5</title>
+  <style>
+    :root {
+      --bg: #eaf7ff;
+      --bg-deep: #d8edf8;
+      --surface: rgba(255, 255, 255, 0.82);
+      --surface-strong: #ffffff;
+      --line: rgba(140, 168, 190, 0.28);
+      --text: #263241;
+      --muted: #6b7c8f;
+      --soft: #9badbf;
+      --cyan: #18d2cf;
+      --cyan-bright: #1fe3f5;
+      --yellow: #ffc21a;
+      --pink: #e83a7e;
+      --green: #1ff529;
+      --blue: #2563eb;
+      --purple: #7c3aed;
+      --orange: #f97316;
+      --red: #dc2626;
+      --shadow: 0 18px 42px rgba(70, 102, 130, 0.16);
+      --shadow-soft: 0 10px 26px rgba(70, 102, 130, 0.12);
+      --phone-w: 390px;
+      --phone-h: 844px;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 12% 8%, rgba(255, 255, 255, 0.92), transparent 24%),
+        radial-gradient(circle at 86% 4%, rgba(31, 227, 245, 0.18), transparent 24%),
+        linear-gradient(180deg, #f5fbff 0%, var(--bg) 46%, #dff1fb 100%);
+    }
+
+    .board {
+      min-width: 1280px;
+      padding: 48px;
+    }
+
+    .board-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 32px;
+      margin-bottom: 34px;
+    }
+
+    .board-title h1 {
+      margin: 0;
+      font-size: 42px;
+      line-height: 1.1;
+      letter-spacing: 0;
+    }
+
+    .board-title p {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 10px;
+      max-width: 520px;
+    }
+
+    .legend span,
+    .rarity {
+      min-width: 42px;
+      height: 28px;
+      padding: 0 12px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 15px;
+      font-weight: 800;
+      box-shadow: 0 8px 18px rgba(38, 50, 65, 0.16);
+    }
+
+    .n, .r { background: var(--green); }
+    .sr { background: var(--cyan-bright); }
+    .ssr { background: var(--blue); }
+    .ur { background: var(--purple); }
+    .lr { background: var(--orange); }
+    .xr { background: var(--red); }
+
+    .screens {
+      display: grid;
+      grid-template-columns: repeat(3, var(--phone-w));
+      gap: 42px 36px;
+      align-items: start;
+    }
+
+    .screen-wrap {
+      display: grid;
+      gap: 14px;
+    }
+
+    .screen-name {
+      font-size: 18px;
+      font-weight: 900;
+      color: var(--text);
+      padding-left: 8px;
+    }
+
+    .phone {
+      position: relative;
+      width: var(--phone-w);
+      height: var(--phone-h);
+      overflow: hidden;
+      border-radius: 34px;
+      background:
+        radial-gradient(circle at 18% 4%, rgba(255, 255, 255, 0.96), transparent 22%),
+        linear-gradient(180deg, #f5fbff 0%, #eaf7ff 58%, #dceff8 100%);
+      box-shadow: 0 28px 70px rgba(49, 84, 110, 0.22);
+      border: 1px solid rgba(255, 255, 255, 0.86);
+    }
+
+    .phone.dark {
+      background:
+        radial-gradient(circle at 72% 18%, rgba(255, 217, 64, 0.34), transparent 18%),
+        radial-gradient(circle at 28% 30%, rgba(31, 227, 245, 0.24), transparent 22%),
+        linear-gradient(180deg, #162c73 0%, #5a42d5 48%, #cbeeff 100%);
+      color: white;
+    }
+
+    .phone-inner {
+      position: absolute;
+      inset: 0;
+      padding: 44px 22px 24px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .title-block h2 {
+      margin: 0;
+      font-size: 30px;
+      line-height: 1.05;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .title-block p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .pill {
+      height: 42px;
+      padding: 0 18px;
+      border-radius: 999px;
+      border: 1px solid rgba(133, 159, 180, 0.24);
+      background: rgba(255, 255, 255, 0.78);
+      box-shadow: var(--shadow-soft);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-size: 15px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin: 20px 0 12px;
+      font-weight: 900;
+    }
+
+    .section-title b {
+      font-size: 21px;
+    }
+
+    .section-title span {
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .mascot {
+      position: relative;
+      width: 86px;
+      height: 82px;
+      flex: 0 0 auto;
+    }
+
+    .mascot::before {
+      content: "";
+      position: absolute;
+      left: 10px;
+      top: 18px;
+      width: 66px;
+      height: 58px;
+      border-radius: 48% 48% 44% 44%;
+      background: var(--yellow);
+      box-shadow: 0 10px 18px rgba(255, 194, 26, 0.28);
+    }
+
+    .mascot::after {
+      content: "";
+      position: absolute;
+      left: 31px;
+      top: 4px;
+      width: 31px;
+      height: 44px;
+      border-radius: 60% 60% 44% 44%;
+      background: var(--yellow);
+      transform: rotate(18deg);
+    }
+
+    .eye {
+      position: absolute;
+      top: 38px;
+      width: 14px;
+      height: 20px;
+      border-radius: 50%;
+      background: #121212;
+      z-index: 1;
+    }
+
+    .eye.left { left: 29px; }
+    .eye.right { right: 29px; }
+
+    .nose {
+      position: absolute;
+      top: 48px;
+      left: 39px;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #ff4545;
+      z-index: 2;
+    }
+
+    .pool-row {
+      display: flex;
+      gap: 12px;
+      margin-left: -2px;
+      padding: 2px 2px 8px;
+      overflow: hidden;
+    }
+
+    .pool-card {
+      position: relative;
+      min-width: 210px;
+      height: 124px;
+      padding: 14px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.76);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      box-shadow: var(--shadow-soft);
+      display: flex;
+      gap: 12px;
+    }
+
+    .pool-card.active {
+      outline: 3px solid rgba(24, 210, 207, 0.62);
+      transform: translateY(-2px);
+    }
+
+    .pack {
+      width: 72px;
+      height: 96px;
+      border-radius: 16px;
+      background:
+        linear-gradient(150deg, rgba(255, 255, 255, 0.8), transparent 35%),
+        linear-gradient(145deg, #ffef71 0%, #ffb23b 44%, #ff6b5e 100%);
+      box-shadow: 0 12px 20px rgba(255, 126, 63, 0.22);
+      border: 2px solid rgba(255, 255, 255, 0.76);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .pack.cyan {
+      background:
+        linear-gradient(150deg, rgba(255, 255, 255, 0.86), transparent 38%),
+        linear-gradient(145deg, #25d9d4 0%, #62f0ca 46%, #fff3bf 100%);
+    }
+
+    .pack.purple {
+      background:
+        linear-gradient(150deg, rgba(255, 255, 255, 0.82), transparent 36%),
+        linear-gradient(145deg, #8d7bff 0%, #ff91cf 50%, #fff3bf 100%);
+    }
+
+    .pack::before {
+      content: "WORD";
+      position: absolute;
+      top: 12px;
+      left: 10px;
+      right: 10px;
+      text-align: center;
+      color: white;
+      font-size: 12px;
+      font-weight: 1000;
+      text-shadow: 0 2px 4px rgba(75, 45, 10, 0.26);
+    }
+
+    .pack::after {
+      content: "";
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 16px;
+      height: 28px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.48);
+    }
+
+    .pool-info {
+      flex: 1;
+      min-width: 0;
+      padding-top: 5px;
+    }
+
+    .pool-info h3 {
+      margin: 0;
+      font-size: 17px;
+      line-height: 1.2;
+      font-weight: 900;
+    }
+
+    .pool-info p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .mini-progress {
+      height: 8px;
+      margin-top: 12px;
+      border-radius: 999px;
+      background: rgba(122, 151, 174, 0.16);
+      overflow: hidden;
+    }
+
+    .mini-progress i {
+      display: block;
+      height: 100%;
+      width: 32%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--cyan), #9cf4dc);
+    }
+
+    .preview-strip {
+      height: 182px;
+      display: flex;
+      gap: 12px;
+      overflow: hidden;
+      padding: 2px 2px 12px;
+    }
+
+    .mini-card {
+      min-width: 112px;
+      height: 160px;
+      border-radius: 20px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.74)),
+        radial-gradient(circle at 70% 18%, rgba(255, 217, 64, 0.3), transparent 30%);
+      box-shadow: var(--shadow-soft);
+      padding: 12px;
+      position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.88);
+    }
+
+    .mini-card .rarity {
+      height: 24px;
+      min-width: 34px;
+      padding: 0 9px;
+      font-size: 13px;
+    }
+
+    .word-art {
+      width: 74px;
+      height: 58px;
+      border-radius: 20px;
+      margin: 13px auto 10px;
+      background:
+        radial-gradient(circle at 52% 36%, #ffffff 0 15%, transparent 16%),
+        linear-gradient(145deg, #fff0a8, #92e9ff);
+    }
+
+    .mini-card strong {
+      display: block;
+      font-size: 18px;
+      line-height: 1.05;
+      font-weight: 1000;
+    }
+
+    .mini-card small {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .action-panel {
+      position: absolute;
+      left: 22px;
+      right: 22px;
+      bottom: 28px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .home-actions {
+      bottom: 96px;
+    }
+
+    .quota {
+      height: 46px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.82);
+      box-shadow: var(--shadow-soft);
+      font-weight: 900;
+      color: var(--muted);
+    }
+
+    .quota b {
+      color: var(--text);
+      font-size: 22px;
+    }
+
+    .btn {
+      height: 58px;
+      border: 0;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #13c8c6, #2fd6de);
+      color: white;
+      font-size: 20px;
+      font-weight: 1000;
+      box-shadow: 0 15px 28px rgba(24, 210, 207, 0.28);
+    }
+
+    .btn.secondary {
+      background: rgba(255, 255, 255, 0.88);
+      color: var(--text);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .bottom-nav {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 74px;
+      background: rgba(246, 252, 255, 0.9);
+      border-top: 1px solid rgba(120, 150, 174, 0.16);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      align-items: center;
+      padding: 0 18px 8px;
+    }
+
+    .nav-item {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+      display: grid;
+      justify-items: center;
+      gap: 5px;
+    }
+
+    .nav-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 9px;
+      border: 3px solid currentColor;
+      opacity: 0.9;
+    }
+
+    .nav-item.active {
+      color: var(--text);
+    }
+
+    .starfield {
+      position: absolute;
+      inset: 0;
+      opacity: 0.58;
+      background-image:
+        radial-gradient(circle, rgba(255,255,255,0.9) 0 1px, transparent 1.5px),
+        radial-gradient(circle, rgba(255,255,255,0.8) 0 1px, transparent 1.5px);
+      background-size: 54px 54px, 86px 86px;
+      background-position: 10px 24px, 36px 8px;
+    }
+
+    .result-title {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
+      font-weight: 900;
+      margin-bottom: 34px;
+    }
+
+    .circle-btn {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.38);
+      display: grid;
+      place-items: center;
+      color: white;
+      font-size: 25px;
+      font-weight: 700;
+    }
+
+    .tear-pack {
+      position: relative;
+      width: 210px;
+      height: 288px;
+      margin: 64px auto 0;
+      border-radius: 34px;
+      background:
+        radial-gradient(circle at 50% 55%, rgba(255,255,255,0.78), transparent 24%),
+        linear-gradient(150deg, #fff276 0%, #ffad32 42%, #ff5d5d 100%);
+      box-shadow: 0 26px 52px rgba(26, 34, 76, 0.32);
+      border: 3px solid rgba(255, 255, 255, 0.72);
+      overflow: hidden;
+    }
+
+    .tear-pack::before {
+      content: "WORD CARDS";
+      position: absolute;
+      top: 34px;
+      left: 20px;
+      right: 20px;
+      text-align: center;
+      font-size: 25px;
+      color: white;
+      font-weight: 1000;
+      text-shadow: 0 3px 8px rgba(111, 69, 16, 0.35);
+    }
+
+    .tear-pack::after {
+      content: "";
+      position: absolute;
+      left: -10px;
+      right: -10px;
+      top: 138px;
+      height: 16px;
+      background:
+        linear-gradient(135deg, transparent 0 22%, rgba(255,255,255,0.86) 22% 34%, transparent 34% 48%, rgba(255,255,255,0.86) 48% 60%, transparent 60% 100%);
+      filter: drop-shadow(0 0 14px rgba(255,255,255,0.75));
+    }
+
+    .tear-copy {
+      position: relative;
+      z-index: 1;
+      margin-top: 34px;
+      text-align: center;
+      color: white;
+      font-size: 20px;
+      font-weight: 1000;
+      text-shadow: 0 3px 10px rgba(20, 24, 80, 0.28);
+    }
+
+    .peek-mascot {
+      position: absolute;
+      left: 122px;
+      bottom: -6px;
+      transform: scale(1.28);
+    }
+
+    .cards-fan {
+      height: 342px;
+      margin-top: 52px;
+      position: relative;
+    }
+
+    .back-card {
+      position: absolute;
+      width: 116px;
+      height: 168px;
+      left: 50%;
+      top: 88px;
+      margin-left: -58px;
+      border-radius: 22px;
+      background:
+        linear-gradient(145deg, rgba(255,255,255,0.9), transparent 32%),
+        linear-gradient(145deg, #25d9d4, #fff08a);
+      box-shadow: 0 16px 30px rgba(19, 29, 76, 0.28);
+      border: 2px solid rgba(255,255,255,0.72);
+      transform-origin: 50% 150%;
+    }
+
+    .back-card:nth-child(1) { transform: translateX(-126px) rotate(-18deg); }
+    .back-card:nth-child(2) { transform: translateX(-64px) rotate(-9deg); }
+    .back-card:nth-child(3) { transform: rotate(0deg); }
+    .back-card:nth-child(4) { transform: translateX(64px) rotate(9deg); }
+    .back-card:nth-child(5) { transform: translateX(126px) rotate(18deg); }
+
+    .back-card::before {
+      content: "?";
+      position: absolute;
+      inset: 34px 22px;
+      border-radius: 24px;
+      background: rgba(255,255,255,0.42);
+      display: grid;
+      place-items: center;
+      color: white;
+      font-size: 46px;
+      font-weight: 1000;
+    }
+
+    .result-hint {
+      position: absolute;
+      left: 22px;
+      right: 22px;
+      bottom: 34px;
+      display: grid;
+      gap: 12px;
+      text-align: center;
+      color: white;
+      font-weight: 900;
+    }
+
+    .card-stage {
+      position: relative;
+      z-index: 1;
+      height: 616px;
+      display: grid;
+      place-items: center;
+      margin-top: 14px;
+    }
+
+    .word-card-large {
+      position: relative;
+      width: 292px;
+      height: 438px;
+      border-radius: 30px;
+      padding: 23px 22px;
+      background:
+        radial-gradient(circle at 50% 32%, rgba(255,255,255,0.95), transparent 27%),
+        linear-gradient(160deg, #ffcbeb 0%, #fff5e8 36%, #b8a4ff 100%);
+      box-shadow: 0 28px 58px rgba(25, 31, 83, 0.35);
+      border: 3px solid rgba(255,255,255,0.78);
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    .word-card-large::before {
+      content: "";
+      position: absolute;
+      inset: 10px;
+      border-radius: 24px;
+      border: 2px solid rgba(255, 255, 255, 0.72);
+      pointer-events: none;
+    }
+
+    .word-card-large .rarity {
+      position: absolute;
+      top: 18px;
+      left: 20px;
+      z-index: 1;
+      height: 32px;
+      min-width: 54px;
+    }
+
+    .new-badge {
+      position: absolute;
+      right: 18px;
+      top: 18px;
+      height: 32px;
+      padding: 0 12px;
+      border-radius: 999px;
+      color: white;
+      background: var(--pink);
+      display: grid;
+      place-items: center;
+      font-size: 14px;
+      font-weight: 1000;
+      z-index: 1;
+    }
+
+    .word-picture {
+      height: 166px;
+      margin-top: 52px;
+      border-radius: 24px;
+      background:
+        radial-gradient(circle at 54% 44%, #fff 0 11%, transparent 12%),
+        radial-gradient(circle at 62% 38%, #ffe15a 0 18%, transparent 19%),
+        linear-gradient(145deg, #fff7c8, #85f0ff 56%, #9be879);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.72);
+    }
+
+    .word-card-large h3 {
+      margin: 20px 0 4px;
+      font-size: 39px;
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .word-card-large p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 22px;
+      font-weight: 900;
+    }
+
+    .sound-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .sound {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      border: 0;
+      background: white;
+      box-shadow: var(--shadow-soft);
+      color: var(--cyan);
+      font-size: 24px;
+      font-weight: 1000;
+    }
+
+    .small-card-row {
+      position: absolute;
+      left: 22px;
+      right: 22px;
+      bottom: 118px;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+
+    .small-open {
+      height: 70px;
+      border-radius: 15px;
+      background: rgba(255,255,255,0.88);
+      box-shadow: var(--shadow-soft);
+      border: 2px solid transparent;
+      display: grid;
+      place-items: center;
+      font-size: 12px;
+      font-weight: 1000;
+      color: var(--muted);
+    }
+
+    .small-open.active {
+      border-color: rgba(31, 227, 245, 0.82);
+      transform: translateY(-5px);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      overflow: hidden;
+      margin: 8px 0 16px;
+    }
+
+    .tab {
+      height: 38px;
+      min-width: 92px;
+      padding: 0 16px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.72);
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 900;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid rgba(255,255,255,0.78);
+    }
+
+    .tab.active {
+      background: linear-gradient(90deg, var(--cyan), var(--cyan-bright));
+      color: white;
+    }
+
+    .album-summary {
+      height: 110px;
+      padding: 18px;
+      border-radius: 26px;
+      background: rgba(255,255,255,0.8);
+      box-shadow: var(--shadow-soft);
+      display: grid;
+      gap: 12px;
+    }
+
+    .album-summary strong {
+      font-size: 24px;
+      font-weight: 1000;
+    }
+
+    .progress {
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(122, 151, 174, 0.16);
+      overflow: hidden;
+    }
+
+    .progress i {
+      display: block;
+      width: 42%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--cyan), #b3f8da);
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 8px;
+      margin: 14px 0 16px;
+      overflow: hidden;
+    }
+
+    .filter {
+      height: 34px;
+      min-width: 48px;
+      padding: 0 13px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.78);
+      color: var(--muted);
+      display: grid;
+      place-items: center;
+      font-size: 14px;
+      font-weight: 1000;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .filter.active {
+      background: var(--text);
+      color: white;
+    }
+
+    .album-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      padding-bottom: 88px;
+    }
+
+    .album-card {
+      min-height: 168px;
+      border-radius: 24px;
+      background: rgba(255,255,255,0.82);
+      box-shadow: var(--shadow-soft);
+      padding: 14px;
+      border: 1px solid rgba(255,255,255,0.86);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .album-card.locked {
+      background: rgba(255,255,255,0.58);
+      color: #b4beca;
+    }
+
+    .album-card .rarity {
+      height: 28px;
+      min-width: 42px;
+      font-size: 14px;
+      margin-bottom: 26px;
+    }
+
+    .album-card h4 {
+      margin: 0;
+      font-size: 25px;
+      line-height: 1;
+      font-weight: 1000;
+      letter-spacing: 0;
+    }
+
+    .album-card p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .owned {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .album-card.locked p,
+    .album-card.locked .owned {
+      color: #aeb8c5;
+    }
+
+    .detail-sheet {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 92px;
+      padding: 18px;
+      border-radius: 28px;
+      background: rgba(255,255,255,0.9);
+      box-shadow: 0 18px 46px rgba(42, 80, 108, 0.22);
+      display: flex;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .detail-thumb {
+      width: 90px;
+      height: 126px;
+      border-radius: 20px;
+      background:
+        radial-gradient(circle at 50% 42%, rgba(255,255,255,0.95), transparent 23%),
+        linear-gradient(160deg, #ffcbeb, #b8a4ff);
+      flex: 0 0 auto;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .detail-copy h3 {
+      margin: 0 0 6px;
+      font-size: 25px;
+      line-height: 1;
+    }
+
+    .detail-copy p {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .note-bubble {
+      position: absolute;
+      left: 24px;
+      right: 24px;
+      bottom: 100px;
+      min-height: 72px;
+      border-radius: 22px;
+      background: rgba(255,255,255,0.86);
+      box-shadow: var(--shadow-soft);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 16px;
+      color: var(--text);
+      font-weight: 1000;
+    }
+
+    .note-bubble .mascot {
+      transform: scale(0.72);
+      transform-origin: left center;
+      margin-right: -22px;
+    }
+
+    .rainbow-line {
+      height: 4px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #ff66b3, #ffd940, #1ff529, #1fe3f5, #7c3aed);
+      margin: 12px 0 16px;
+    }
+
+    .glow {
+      position: absolute;
+      width: 190px;
+      height: 190px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      filter: blur(12px);
+      left: 100px;
+      top: 190px;
+    }
+  </style>
+</head>
+<body>
+  <main class="board">
+    <header class="board-header">
+      <div class="board-title">
+        <h1>تصميم عالي الدقة لتجربة سحب البطاقات H5</h1>
+        <p>امتداد وفق مواصفات Figma الحالية: خلفية زرقاء ضبابية، بطاقات زجاجية، أزرار كبسولية، إجراء رئيسي سماوي، وشخصية صفراء مرافقة.</p>
+      </div>
+      <div class="legend" aria-label="ألوان الندرة">
+        <span class="n">N</span>
+        <span class="r">R</span>
+        <span class="sr">SR</span>
+        <span class="ssr">SSR</span>
+        <span class="ur">UR</span>
+        <span class="lr">LR</span>
+        <span class="xr">XR</span>
+      </div>
+    </header>
+
+    <section class="screens">
+      <div class="screen-wrap">
+        <div class="screen-name">01 الصفحة الرئيسية للسحب</div>
+        <article class="phone">
+          <div class="phone-inner">
+            <div class="topbar">
+              <div class="title-block">
+                <h2>بطاقات الكلمات</h2>
+                <p>لديك 5 محاولات اليوم</p>
+              </div>
+              <div class="mascot" aria-hidden="true">
+                <i class="eye left"></i><i class="eye right"></i><i class="nose"></i>
+              </div>
+            </div>
+
+            <div class="section-title">
+              <b>اختر مجموعة البطاقات</b>
+              <span>80/250</span>
+            </div>
+            <div class="pool-row">
+              <div class="pool-card active">
+                <div class="pack"></div>
+                <div class="pool-info">
+                  <h3>مجموعة كلمات المرحلة الأولى</h3>
+                  <p>مفردات أساسية · متاحة</p>
+                  <div class="mini-progress"><i></i></div>
+                </div>
+              </div>
+              <div class="pool-card">
+                <div class="pack cyan"></div>
+                <div class="pool-info">
+                  <h3>استكشاف الطبيعة</h3>
+                  <p>Nature · معاينة</p>
+                  <div class="mini-progress"><i style="width: 18%"></i></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="section-title">
+              <b>المتاح للجمع في هذه الفترة</b>
+              <span>عرض 10 بطاقات افتراضيًا</span>
+            </div>
+            <div class="preview-strip">
+              <div class="mini-card">
+                <span class="rarity xr">XR</span>
+                <div class="word-art"></div>
+                <strong>rainbow</strong>
+                <small>قوس قزح</small>
+              </div>
+              <div class="mini-card">
+                <span class="rarity ur">UR</span>
+                <div class="word-art"></div>
+                <strong>star</strong>
+                <small>نجمة</small>
+              </div>
+              <div class="mini-card">
+                <span class="rarity sr">SR</span>
+                <div class="word-art"></div>
+                <strong>kiwi</strong>
+                <small>كيوي</small>
+              </div>
+              <div class="mini-card">
+                <span class="rarity r">R</span>
+                <div class="word-art"></div>
+                <strong>hotel</strong>
+                <small>فندق</small>
+              </div>
+            </div>
+
+            <div class="action-panel home-actions">
+              <div class="quota"><span>المتبقي اليوم</span><b>5</b></div>
+              <button class="btn">اسحب حزمة</button>
+              <button class="btn secondary">عرض الألبوم</button>
+            </div>
+            <nav class="bottom-nav">
+              <div class="nav-item active"><i class="nav-icon"></i><span>السحب</span></div>
+              <div class="nav-item"><i class="nav-icon"></i><span>الألبوم</span></div>
+              <div class="nav-item"><i class="nav-icon"></i><span>القواعد</span></div>
+            </nav>
+          </div>
+        </article>
+      </div>
+
+      <div class="screen-wrap">
+        <div class="screen-name">02 فتح الحزمة</div>
+        <article class="phone dark">
+          <div class="starfield"></div>
+          <div class="phone-inner">
+            <div class="result-title">
+              <div class="circle-btn">×</div>
+              <strong>جاهز لفتح الحزمة</strong>
+              <div class="circle-btn">?</div>
+            </div>
+            <div class="glow"></div>
+            <div class="tear-pack"></div>
+            <div class="tear-copy">اضغط لفتح الحزمة</div>
+            <div class="note-bubble">
+              <div class="mascot" aria-hidden="true">
+                <i class="eye left"></i><i class="eye right"></i><i class="nose"></i>
+              </div>
+              <span>هل ستحصل على كلمة جديدة؟</span>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <div class="screen-wrap">
+        <div class="screen-name">03 خمس بطاقات بانتظار الفتح</div>
+        <article class="phone dark">
+          <div class="starfield"></div>
+          <div class="phone-inner">
+            <div class="result-title">
+              <div class="circle-btn">×</div>
+              <strong>نتيجة السحب</strong>
+              <div class="pill" style="height: 38px; color: white; background: rgba(255,255,255,0.18);">تخطي</div>
+            </div>
+            <div class="cards-fan">
+              <div class="back-card"></div>
+              <div class="back-card"></div>
+              <div class="back-card"></div>
+              <div class="back-card"></div>
+              <div class="back-card"></div>
+            </div>
+            <div class="result-hint">
+              <span>اضغط البطاقات لمشاهدتها بالترتيب</span>
+              <button class="btn secondary">افتح البطاقة الأولى</button>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <div class="screen-wrap">
+        <div class="screen-name">04 بطاقة مفتوحة</div>
+        <article class="phone dark">
+          <div class="starfield"></div>
+          <div class="phone-inner">
+            <div class="result-title">
+              <div class="circle-btn">×</div>
+              <strong>البطاقة 4 / 5</strong>
+              <div class="pill" style="height: 38px; color: white; background: rgba(255,255,255,0.18);">تخطي</div>
+            </div>
+            <div class="card-stage">
+              <div class="word-card-large">
+                <span class="rarity ur">UR</span>
+                <span class="new-badge">بطاقة جديدة</span>
+                <div class="word-picture"></div>
+                <h3>star</h3>
+                <p>نجمة</p>
+                <div class="sound-row">
+                  <span class="pill">/stɑːr/</span>
+                  <button class="sound">▶</button>
+                </div>
+              </div>
+            </div>
+            <div class="small-card-row">
+              <div class="small-open">N</div>
+              <div class="small-open">R</div>
+              <div class="small-open">SR</div>
+              <div class="small-open active">UR</div>
+              <div class="small-open">?</div>
+            </div>
+            <div class="action-panel">
+              <button class="btn">متابعة المشاهدة</button>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <div class="screen-wrap">
+        <div class="screen-name">05 ألبومي · الكل</div>
+        <article class="phone">
+          <div class="phone-inner">
+            <div class="topbar">
+              <div class="title-block">
+                <h2>ألبومي</h2>
+                <p>مجموعة كلمات المرحلة الأولى</p>
+              </div>
+              <div class="pill">80/250</div>
+            </div>
+            <div class="rainbow-line"></div>
+            <div class="tabs">
+              <div class="tab active">كلمات المرحلة الأولى</div>
+              <div class="tab">استكشاف الطبيعة</div>
+              <div class="tab">حياة المدينة</div>
+            </div>
+            <div class="album-summary">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <strong>تقدم الجمع</strong>
+                <span class="pill" style="height:34px;">32%</span>
+              </div>
+              <div class="progress"><i></i></div>
+            </div>
+            <div class="filter-row">
+              <div class="filter active">الكل</div>
+              <div class="filter">XR</div>
+              <div class="filter">LR</div>
+              <div class="filter">UR</div>
+              <div class="filter">SSR</div>
+            </div>
+            <div class="album-grid">
+              <div class="album-card">
+                <span class="rarity xr">XR</span>
+                <h4>rainbow</h4>
+                <p>قوس قزح</p>
+                <div class="owned">مملوك: 1</div>
+              </div>
+              <div class="album-card">
+                <span class="rarity ur">UR</span>
+                <h4>star</h4>
+                <p>نجمة</p>
+                <div class="owned">مملوك: 1</div>
+              </div>
+              <div class="album-card locked">
+                <span class="rarity lr">LR</span>
+                <h4>غير مجمعة</h4>
+                <p>بانتظار الجمع</p>
+                <div class="owned">0/20</div>
+              </div>
+              <div class="album-card">
+                <span class="rarity sr">SR</span>
+                <h4>kiwi</h4>
+                <p>كيوي</p>
+                <div class="owned">مملوك: 2</div>
+              </div>
+            </div>
+            <nav class="bottom-nav">
+              <div class="nav-item"><i class="nav-icon"></i><span>السحب</span></div>
+              <div class="nav-item active"><i class="nav-icon"></i><span>الألبوم</span></div>
+              <div class="nav-item"><i class="nav-icon"></i><span>القواعد</span></div>
+            </nav>
+          </div>
+        </article>
+      </div>
+
+      <div class="screen-wrap">
+        <div class="screen-name">06 تصفية الندرة / تفاصيل البطاقة</div>
+        <article class="phone">
+          <div class="phone-inner">
+            <div class="topbar">
+              <div class="title-block">
+                <h2>ألبومي</h2>
+                <p>عرض UR فقط · 3/28</p>
+              </div>
+              <div class="pill">UR</div>
+            </div>
+            <div class="rainbow-line"></div>
+            <div class="tabs">
+              <div class="tab active">كلمات المرحلة الأولى</div>
+              <div class="tab">استكشاف الطبيعة</div>
+            </div>
+            <div class="filter-row">
+              <div class="filter">الكل</div>
+              <div class="filter">XR</div>
+              <div class="filter">LR</div>
+              <div class="filter active">UR</div>
+              <div class="filter">SSR</div>
+            </div>
+            <div class="album-grid">
+              <div class="album-card">
+                <span class="rarity ur">UR</span>
+                <h4>star</h4>
+                <p>نجمة</p>
+                <div class="owned">مملوك: 1</div>
+              </div>
+              <div class="album-card locked">
+                <span class="rarity ur">UR</span>
+                <h4>غير مجمعة</h4>
+                <p>بانتظار الجمع</p>
+                <div class="owned">0/28</div>
+              </div>
+              <div class="album-card">
+                <span class="rarity ur">UR</span>
+                <h4>museum</h4>
+                <p>متحف</p>
+                <div class="owned">مملوك: 1</div>
+              </div>
+              <div class="album-card locked">
+                <span class="rarity ur">UR</span>
+                <h4>غير مجمعة</h4>
+                <p>بانتظار الجمع</p>
+                <div class="owned">0/28</div>
+              </div>
+            </div>
+            <div class="detail-sheet">
+              <div class="detail-thumb"></div>
+              <div class="detail-copy">
+                <span class="rarity ur">UR</span>
+                <h3>star</h3>
+                <p>نجمة · مملوك 1</p>
+                <button class="sound">▶</button>
+              </div>
+            </div>
+            <nav class="bottom-nav">
+              <div class="nav-item"><i class="nav-icon"></i><span>السحب</span></div>
+              <div class="nav-item active"><i class="nav-icon"></i><span>الألبوم</span></div>
+              <div class="nav-item"><i class="nav-icon"></i><span>القواعد</span></div>
+            </nav>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

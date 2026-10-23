@@ -1,0 +1,1077 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>لوحة إدارة البطاقات</title>
+    <style>
+        :root {
+            --bg: #edf6fb;
+            --surface: rgba(255,255,255,.86);
+            --text: #263241;
+            --muted: #68798b;
+            --line: rgba(105,135,160,.24);
+            --cyan: #20d4df;
+            --dark: #40536a;
+            --shadow: 0 14px 32px rgba(70,102,130,.14);
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", sans-serif;
+            color: var(--text);
+            background: linear-gradient(180deg, #f8fcff 0%, var(--bg) 62%, #dbeff8 100%);
+        }
+        button, input, select, textarea { font: inherit; }
+        button { border: 0; cursor: pointer; }
+        .page {
+            width: min(1440px, 100%);
+            margin: 0 auto;
+            padding: 28px 32px 48px;
+        }
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 22px;
+        }
+        h1 { margin: 0; font-size: 30px; letter-spacing: 0; }
+        .sub { margin-top: 6px; color: var(--muted); }
+        .primary {
+            min-width: 132px;
+            height: 44px;
+            border-radius: 999px;
+            color: white;
+            background: linear-gradient(135deg, #18c9bd, #27d6dc);
+            font-weight: 900;
+            box-shadow: 0 10px 22px rgba(39,214,220,.26);
+        }
+        .top-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .link-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 112px;
+            height: 44px;
+            border-radius: 999px;
+            padding: 0 16px;
+            background: rgba(255,255,255,.9);
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 900;
+            box-shadow: 0 7px 16px rgba(70,102,130,.12);
+        }
+        .secondary {
+            height: 38px;
+            border-radius: 999px;
+            padding: 0 16px;
+            background: rgba(255,255,255,.9);
+            color: var(--text);
+            font-weight: 800;
+            box-shadow: 0 7px 16px rgba(70,102,130,.12);
+        }
+        .danger { color: #dc2626; }
+        .import-line {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 18px;
+            padding: 14px 16px;
+            border-radius: 18px;
+            background: rgba(255,255,255,.66);
+            border: 1px solid rgba(255,255,255,.88);
+        }
+        .import-line p { margin: 0; color: var(--muted); font-weight: 800; }
+        .import-line label {
+            display: inline-flex;
+            grid-auto-flow: column;
+            align-items: center;
+            gap: 8px;
+            color: var(--text);
+            white-space: nowrap;
+        }
+        .import-line input[type="checkbox"] { width: 18px; height: 18px; }
+        .panel {
+            background: var(--surface);
+            border: 1px solid rgba(255,255,255,.9);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            padding: 20px;
+            margin-bottom: 18px;
+        }
+        .section-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .section-head h2 { margin: 0; font-size: 22px; }
+        .section-head p { margin: 5px 0 0; color: var(--muted); font-weight: 700; }
+        .pool-create {
+            display: grid;
+            grid-template-columns: 120px minmax(170px, 1fr) minmax(220px, 1fr) 100px 130px 170px auto auto;
+            gap: 12px;
+            align-items: end;
+            margin-bottom: 18px;
+        }
+        .pool-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+        .pool-card {
+            border-radius: 18px;
+            padding: 16px;
+            background: rgba(255,255,255,.75);
+            border: 1px solid rgba(255,255,255,.94);
+            box-shadow: 0 8px 20px rgba(70,102,130,.08);
+        }
+        .pool-card.active {
+            border-color: rgba(31,227,245,.75);
+            box-shadow: 0 12px 24px rgba(31,227,245,.16);
+        }
+        .pool-cover {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            border-radius: 14px;
+            object-fit: cover;
+            background: linear-gradient(135deg, rgba(31,227,245,.16), rgba(255,255,255,.82));
+            border: 1px solid rgba(255,255,255,.9);
+            margin-bottom: 12px;
+        }
+        .pool-cover.empty {
+            display: grid;
+            place-items: center;
+            color: var(--muted);
+            font-weight: 900;
+        }
+        .pool-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        .pool-title strong { font-size: 20px; }
+        .pool-meta {
+            display: grid;
+            gap: 5px;
+            color: var(--muted);
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+        .rule-panel {
+            display: none;
+            border-radius: 18px;
+            padding: 16px;
+            background: rgba(248,252,255,.8);
+            border: 1px solid var(--line);
+        }
+        .rule-panel.active { display: block; }
+        .rule-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .rule-title strong { font-size: 18px; }
+        .prob-table {
+            width: 100%;
+            min-width: 840px;
+        }
+        .prob-table input {
+            height: 36px;
+            padding: 0 8px;
+            text-align: center;
+            border-radius: 10px;
+        }
+        .prob-table th,
+        .prob-table td {
+            padding: 9px 8px;
+        }
+        .slot-name {
+            min-width: 72px;
+            font-weight: 900;
+        }
+        .slot-total {
+            min-width: 86px;
+            font-weight: 900;
+            color: var(--muted);
+        }
+        .slot-total.bad { color: #dc2626; }
+        .rule-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 14px;
+        }
+        .filters {
+            display: grid;
+            grid-template-columns: 130px 140px 140px minmax(220px, 1fr) auto;
+            gap: 12px;
+            align-items: end;
+            margin-bottom: 18px;
+        }
+        label {
+            display: grid;
+            gap: 8px;
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 800;
+        }
+        input, select, textarea {
+            width: 100%;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            color: var(--text);
+            background: rgba(255,255,255,.82);
+            outline: none;
+        }
+        input, select { height: 42px; padding: 0 12px; }
+        textarea { min-height: 76px; padding: 11px 12px; resize: vertical; }
+        .upload-field {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 8px;
+            align-items: center;
+        }
+        .upload-field textarea { min-height: 76px; }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(120px, 1fr));
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+        .stat {
+            border-radius: 18px;
+            padding: 14px;
+            background: rgba(255,255,255,.74);
+            border: 1px solid rgba(255,255,255,.9);
+        }
+        .stat span { color: var(--muted); font-weight: 800; }
+        .stat strong { display: block; margin-top: 6px; font-size: 26px; }
+        .table-wrap {
+            overflow: auto;
+            border-radius: 18px;
+            border: 1px solid var(--line);
+            background: rgba(255,255,255,.65);
+        }
+        table {
+            width: 100%;
+            min-width: 1120px;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 13px 12px;
+            border-bottom: 1px solid var(--line);
+            text-align: left;
+            vertical-align: middle;
+        }
+        th {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            background: #f5fbff;
+            color: var(--muted);
+            font-size: 13px;
+        }
+        tbody tr:hover { background: rgba(31,227,245,.08); }
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 42px;
+            height: 26px;
+            border-radius: 999px;
+            padding: 0 10px;
+            background: var(--dark);
+            color: white;
+            font-size: 12px;
+            font-weight: 900;
+        }
+        .status {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 999px;
+            height: 26px;
+            padding: 0 10px;
+            font-size: 12px;
+            font-weight: 900;
+            background: #e8eef5;
+            color: var(--muted);
+        }
+        .status.ONLINE { background: #dcfce7; color: #15803d; }
+        .status.OFFLINE { background: #fee2e2; color: #b91c1c; }
+        .status.DRAFT { background: #fef3c7; color: #b45309; }
+        .actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .empty {
+            padding: 34px;
+            text-align: center;
+            color: var(--muted);
+            font-weight: 800;
+        }
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            place-items: center;
+            padding: 22px;
+            background: rgba(18,30,44,.28);
+            z-index: 20;
+        }
+        .modal.active { display: grid; }
+        .dialog {
+            width: min(720px, 100%);
+            max-height: 92vh;
+            overflow: auto;
+            background: #f8fcff;
+            border-radius: 26px;
+            box-shadow: 0 20px 44px rgba(24,44,64,.22);
+            padding: 22px;
+        }
+        .dialog-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+        }
+        .dialog-head h2 { margin: 0; font-size: 22px; }
+        .close {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #ffffff;
+            font-size: 24px;
+            color: var(--muted);
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+        .form-grid .full { grid-column: 1 / -1; }
+        .dialog-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 18px;
+        }
+        .toast {
+            position: fixed;
+            left: 50%;
+            bottom: 24px;
+            transform: translateX(-50%);
+            z-index: 30;
+            max-width: min(520px, calc(100vw - 32px));
+            border-radius: 999px;
+            padding: 12px 18px;
+            background: rgba(38,50,65,.94);
+            color: white;
+            display: none;
+            font-weight: 800;
+        }
+        .toast.active { display: block; }
+        @media (max-width: 900px) {
+            .page { padding: 20px 16px 34px; }
+            .topbar { align-items: flex-start; flex-direction: column; }
+            .top-actions { justify-content: flex-start; }
+            .import-line { align-items: flex-start; flex-direction: column; }
+            .pool-create { grid-template-columns: 1fr; }
+            .pool-grid { grid-template-columns: 1fr; }
+            .filters { grid-template-columns: 1fr; }
+            .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .form-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<main class="page">
+    <div class="topbar">
+        <div>
+            <h1>إدارة البطاقات</h1>
+            <div class="sub">المرحلة الثانية للإدارة: البحث عن البطاقات وتعديلها وإضافتها وتفعيلها/إيقافها</div>
+        </div>
+        <div class="top-actions">
+            <a class="link-btn" href="/prototype.html" target="_blank">محاكي السحب</a>
+            <a class="link-btn" href="/h5.html" target="_blank">معاينة H5</a>
+            <button class="secondary" id="importBtn">رفع Excel</button>
+            <button class="primary" id="createBtn">إضافة بطاقة</button>
+        </div>
+    </div>
+
+    <section class="panel">
+        <div class="section-head">
+            <div>
+                <h2>إدارة مجموعات البطاقات</h2>
+                <p>بعد إضافة مجموعة بطاقات يمكن إعداد معلومات العرض والاحتمالات بشكل مستقل؛ يمكن وجود عدة مجموعات متاحة في الوقت نفسه ليختار المستخدم منها.</p>
+            </div>
+        </div>
+
+        <div class="pool-create">
+            <label>إصدار المجموعة
+                <input id="newPoolVersion" placeholder="مثل v2">
+            </label>
+            <label>اسم المجموعة
+                <input id="newPoolName" placeholder="مثل مجموعة كلمات المرحلة الثانية">
+            </label>
+            <label>صورة الحزمة
+                <div class="upload-field">
+                    <input id="newPoolImage" placeholder="سيتم إنشاء الرابط بعد الرفع، ويمكن إدخاله يدويًا أيضًا">
+                    <button type="button" class="secondary" data-upload-target="newPoolImage">رفع</button>
+                </div>
+            </label>
+            <label>ترتيب العرض
+                <input id="newPoolSortNo" type="number" min="1" step="1" value="1">
+            </label>
+            <label>الحالة الأولية
+                <select id="newPoolStatus">
+                    <option value="ONLINE">متاح</option>
+                    <option value="DRAFT">مسودة</option>
+                    <option value="OFFLINE">غير متاح</option>
+                </select>
+            </label>
+            <label>نسخ الاحتمالات من
+                <select id="copyRulesFrom"></select>
+            </label>
+            <button class="primary" id="createPoolBtn">إضافة مجموعة</button>
+            <button class="secondary" id="cancelPoolEditBtn" style="display:none;">إلغاء التعديل</button>
+        </div>
+
+        <div class="pool-grid" id="poolGrid"></div>
+
+        <div class="rule-panel" id="rulePanel">
+            <div class="rule-title">
+                <strong id="ruleTitle">احتمالات المواضع</strong>
+                <button class="secondary" id="closeRuleBtn">طي</button>
+            </div>
+            <div class="table-wrap">
+                <table class="prob-table">
+                    <thead>
+                    <tr>
+                        <th>الموضع</th>
+                        <th>N</th>
+                        <th>R</th>
+                        <th>SR</th>
+                        <th>SSR</th>
+                        <th>UR</th>
+                        <th>LR</th>
+                        <th>XR</th>
+                        <th>الإجمالي</th>
+                    </tr>
+                    </thead>
+                    <tbody id="slotRows"></tbody>
+                </table>
+            </div>
+            <div class="rule-actions">
+                <button class="secondary" id="defaultRulesBtn">إدخال الاحتمالات الافتراضية</button>
+                <button class="primary" id="saveRulesBtn">حفظ الاحتمالات</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="panel">
+        <div class="section-head">
+            <div>
+                <h2>إدارة البطاقات</h2>
+                <p>سيستخدم البحث الحالي واستيراد Excel إصدار المجموعة أدناه.</p>
+            </div>
+        </div>
+        <div class="import-line">
+            <p>يدعم رفع Excel لإضافة بطاقات. يجب أن تحتوي العناوين على: الكلمة، المعنى، الندرة؛ والمعنى بالعربية اختياري.</p>
+            <label><input type="checkbox" id="skipDuplicates" checked> تجاوز البطاقات المكررة لنفس الكلمة ونفس الندرة</label>
+            <input id="excelFile" type="file" accept=".xlsx" style="display:none;">
+            <input id="resourceFile" type="file" style="display:none;">
+            <button class="secondary" id="syncArabicBtn">مزامنة العربية الأولية</button>
+            <button class="secondary" id="syncAudioBtn">مزامنة الصوت المحلي</button>
+        </div>
+
+        <div class="filters">
+            <label>إصدار المجموعة
+                <input id="poolVersion" value="v1">
+            </label>
+            <label>الحالة
+                <select id="statusFilter">
+                    <option value="">الكل</option>
+                    <option value="ONLINE">متاح</option>
+                    <option value="OFFLINE">غير متاح</option>
+                    <option value="DRAFT">مسودة</option>
+                </select>
+            </label>
+            <label>الندرة
+                <select id="rarityFilter">
+                    <option value="">الكل</option>
+                    <option>N</option><option>R</option><option>SR</option><option>SSR</option><option>UR</option><option>LR</option><option>XR</option>
+                </select>
+            </label>
+            <label>بحث
+                <input id="keyword" placeholder="أدخل الكلمة الإنجليزية أو المعنى أو المعنى بالعربية">
+            </label>
+            <button class="primary" id="searchBtn">بحث</button>
+        </div>
+
+        <div class="stats" id="stats"></div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th style="width:78px;">الترتيب</th>
+                    <th style="width:82px;">ID</th>
+                    <th>الكلمة</th>
+                    <th>المعنى</th>
+                    <th>المعنى بالعربية</th>
+                    <th style="width:92px;">الندرة</th>
+                    <th style="width:92px;">الحالة</th>
+                    <th>رابط الصورة</th>
+                    <th>رابط الصوت</th>
+                    <th style="width:210px;">الإجراء</th>
+                </tr>
+                </thead>
+                <tbody id="cardRows"></tbody>
+            </table>
+            <div id="empty" class="empty" style="display:none;">لم يتم العثور على بطاقات مطابقة</div>
+        </div>
+    </section>
+</main>
+
+<section id="modal" class="modal" aria-hidden="true">
+    <div class="dialog">
+        <div class="dialog-head">
+            <h2 id="modalTitle">تعديل البطاقة</h2>
+            <button class="close" id="closeBtn">×</button>
+        </div>
+        <form id="cardForm">
+            <input type="hidden" id="cardId">
+            <div class="form-grid">
+                <label>الكلمة
+                    <input id="word" required>
+                </label>
+                <label>المعنى
+                    <input id="meaning">
+                </label>
+                <label>المعنى بالعربية
+                    <input id="arabicMeaning" dir="rtl">
+                </label>
+                <label>الندرة
+                    <select id="rarity" required>
+                        <option>N</option><option>R</option><option>SR</option><option>SSR</option><option>UR</option><option>LR</option><option>XR</option>
+                    </select>
+                </label>
+                <label>الحالة
+                    <select id="status" required>
+                        <option>ONLINE</option>
+                        <option>OFFLINE</option>
+                        <option>DRAFT</option>
+                    </select>
+                </label>
+                <label>إصدار المجموعة
+                    <input id="formPoolVersion" value="v1" required>
+                </label>
+                <label>رقم الترتيب
+                    <input id="sortNo" type="number" min="0" step="1">
+                </label>
+                <label class="full">رابط الصورة
+                    <div class="upload-field">
+                        <textarea id="imageUrl"></textarea>
+                        <button type="button" class="secondary" data-upload-target="imageUrl" data-upload-type="image">رفع</button>
+                    </div>
+                </label>
+                <label class="full">رابط الصوت
+                    <div class="upload-field">
+                        <textarea id="audioUrl"></textarea>
+                        <button type="button" class="secondary" data-upload-target="audioUrl" data-upload-type="audio">رفع</button>
+                    </div>
+                </label>
+            </div>
+            <div class="dialog-actions">
+                <button type="button" class="secondary" id="cancelBtn">إلغاء</button>
+                <button type="submit" class="primary">حفظ</button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    const rarityOrder = ["N", "R", "SR", "SSR", "UR", "LR", "XR"];
+    const statusText = {ONLINE: "متاح", OFFLINE: "غير متاح", DRAFT: "مسودة"};
+    let defaultRuleMatrix = {};
+    let pools = [];
+    let cards = [];
+    let selectedRulePool = null;
+    let ruleMatrix = {};
+    let editingPoolId = null;
+    let pendingUploadTarget = null;
+    let pendingUploadType = "image";
+
+    const $ = (id) => document.getElementById(id);
+
+    async function request(path, options = {}) {
+        const res = await fetch(path, options);
+        const json = await res.json();
+        if (!json.success) throw new Error(json.message || "فشل الطلب");
+        return json.data;
+    }
+
+    function toast(message) {
+        $("toast").textContent = message;
+        $("toast").classList.add("active");
+        window.clearTimeout(toast.timer);
+        toast.timer = window.setTimeout(() => $("toast").classList.remove("active"), 1800);
+    }
+
+    function fallbackCdnImage(img) {
+        const cdnPrefix = "https://cdn.51talkjr.com/";
+        if (img.src.startsWith(cdnPrefix)) {
+            img.src = "/" + img.src.slice(cdnPrefix.length);
+            return;
+        }
+        img.style.display = "none";
+    }
+
+    function emptyRuleMatrix() {
+        const matrix = {};
+        for (let slot = 1; slot <= 5; slot++) {
+            matrix[slot] = {};
+            rarityOrder.forEach(rarity => matrix[slot][rarity] = 0);
+        }
+        return matrix;
+    }
+
+    async function loadDefaultRules() {
+        const rules = await request("/admin/card-draw/slot-rules/defaults");
+        defaultRuleMatrix = emptyRuleMatrix();
+        rules.forEach(rule => {
+            defaultRuleMatrix[rule.slotNo][rule.rarity] = rule.probabilityBasisPoints / 100;
+        });
+    }
+
+    function applyDefaultRules() {
+        if (!Object.keys(defaultRuleMatrix).length) {
+            toast("لم يتم تحميل الاحتمالات الافتراضية بعد");
+            return;
+        }
+        ruleMatrix = emptyRuleMatrix();
+        Object.entries(defaultRuleMatrix).forEach(([slot, values]) => {
+            Object.entries(values).forEach(([rarity, percent]) => {
+                ruleMatrix[slot][rarity] = percent;
+            });
+        });
+        renderSlotRows();
+    }
+
+    async function loadPools() {
+        pools = await request("/admin/card-draw/pools");
+        renderPoolOptions();
+        renderPoolGrid();
+    }
+
+    function renderPoolOptions() {
+        const options = [`<option value="">استخدام الاحتمالات الافتراضية</option>`]
+            .concat(pools.map(pool => `<option value="${pool.id}">${pool.version} | ${pool.name}</option>`));
+        $("copyRulesFrom").innerHTML = options.join("");
+    }
+
+    function renderPoolGrid() {
+        $("poolGrid").innerHTML = pools.map(pool => `
+                <div class="pool-card">
+                ${pool.packImageUrl
+                    ? `<img class="pool-cover" src="${pool.packImageUrl}" alt="${pool.name}" onerror="fallbackCdnImage(this)">`
+                    : `<div class="pool-cover empty">لم يتم إعداد صورة الحزمة</div>`}
+                <div class="pool-title">
+                    <strong>${pool.name}</strong>
+                    <span class="status ${pool.status}">${statusText[pool.status] || pool.status}</span>
+                </div>
+                <div class="pool-meta">
+                    <span>الإصدار: ${pool.version}</span>
+                    <span>ترتيب العرض: ${pool.displaySortNo || 1}</span>
+                    <span>البطاقات: ${pool.cardCount} بطاقة</span>
+                </div>
+                <div class="actions">
+                    <button class="secondary" data-pool-action="edit" data-id="${pool.id}">تعديل العرض</button>
+                    <button class="secondary" data-pool-action="use" data-id="${pool.id}">عرض البطاقات</button>
+                    <button class="secondary" data-pool-action="rules" data-id="${pool.id}">إعداد الاحتمالات</button>
+                </div>
+            </div>
+        `).join("");
+    }
+
+    function resetPoolForm() {
+        editingPoolId = null;
+        $("newPoolVersion").value = "";
+        $("newPoolName").value = "";
+        $("newPoolImage").value = "";
+        $("newPoolSortNo").value = "1";
+        $("newPoolStatus").value = "ONLINE";
+        $("copyRulesFrom").value = "";
+        $("copyRulesFrom").disabled = false;
+        $("createPoolBtn").textContent = "إضافة مجموعة";
+        $("cancelPoolEditBtn").style.display = "none";
+    }
+
+    function editPool(pool) {
+        editingPoolId = pool.id;
+        $("newPoolVersion").value = pool.version;
+        $("newPoolName").value = pool.name;
+        $("newPoolImage").value = pool.packImageUrl || "";
+        $("newPoolSortNo").value = pool.displaySortNo || 1;
+        $("newPoolStatus").value = pool.status || "DRAFT";
+        $("copyRulesFrom").value = "";
+        $("copyRulesFrom").disabled = true;
+        $("createPoolBtn").textContent = "حفظ المجموعة";
+        $("cancelPoolEditBtn").style.display = "inline-flex";
+        window.scrollTo({top: 0, behavior: "smooth"});
+    }
+
+    async function savePool() {
+        const version = $("newPoolVersion").value.trim();
+        const name = $("newPoolName").value.trim();
+        if (!version || !name) {
+            toast("يرجى تعبئة إصدار المجموعة واسمها");
+            return;
+        }
+        const path = editingPoolId ? `/admin/card-draw/pools/${editingPoolId}` : "/admin/card-draw/pools";
+        const wasEditing = Boolean(editingPoolId);
+        const pool = await request(path, {
+            method: wasEditing ? "PUT" : "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+                version,
+                name,
+                packImageUrl: $("newPoolImage").value.trim(),
+                displaySortNo: Number($("newPoolSortNo").value || 1),
+                status: $("newPoolStatus").value,
+                copyRulesFromPoolId: !wasEditing && $("copyRulesFrom").value ? Number($("copyRulesFrom").value) : null
+            })
+        });
+        resetPoolForm();
+        $("poolVersion").value = pool.version;
+        toast(wasEditing ? "تم حفظ المجموعة" : "تمت إضافة المجموعة");
+        await loadPools();
+        await loadCards();
+    }
+
+    async function showRules(poolId) {
+        selectedRulePool = pools.find(pool => pool.id === poolId);
+        if (!selectedRulePool) return;
+        const rules = await request(`/admin/card-draw/slot-rules?poolId=${poolId}`);
+        ruleMatrix = emptyRuleMatrix();
+        rules.forEach(rule => {
+            ruleMatrix[rule.slotNo][rule.rarity] = rule.probabilityBasisPoints / 100;
+        });
+        $("ruleTitle").textContent = `${selectedRulePool.version} | ${selectedRulePool.name} احتمالات المواضع`;
+        $("rulePanel").classList.add("active");
+        renderSlotRows();
+    }
+
+    function renderSlotRows() {
+        $("slotRows").innerHTML = [1, 2, 3, 4, 5].map(slot => {
+            const total = slotTotal(slot);
+            return `
+                <tr>
+                    <td class="slot-name">رقم ${slot} بطاقة</td>
+                    ${rarityOrder.map(rarity => `
+                        <td><input type="number" min="0" max="100" step="0.01" data-slot="${slot}" data-rarity="${rarity}" value="${formatPercent(ruleMatrix[slot]?.[rarity] || 0)}"></td>
+                    `).join("")}
+                    <td class="slot-total ${Math.abs(total - 100) > 0.001 ? "bad" : ""}" data-total-slot="${slot}">${formatPercent(total)}%</td>
+                </tr>
+            `;
+        }).join("");
+    }
+
+    function slotTotal(slot) {
+        return rarityOrder.reduce((sum, rarity) => sum + Number(ruleMatrix[slot]?.[rarity] || 0), 0);
+    }
+
+    function formatPercent(value) {
+        const rounded = Math.round(Number(value) * 100) / 100;
+        return Number.isInteger(rounded) ? String(rounded) : String(rounded.toFixed(2));
+    }
+
+    function refreshSlotTotal(slot) {
+        const target = document.querySelector(`[data-total-slot="${slot}"]`);
+        if (!target) return;
+        const total = slotTotal(slot);
+        target.textContent = `${formatPercent(total)}%`;
+        target.classList.toggle("bad", Math.abs(total - 100) > 0.001);
+    }
+
+    async function saveRules() {
+        if (!selectedRulePool) return;
+        const badSlots = [1, 2, 3, 4, 5].filter(slot => Math.abs(slotTotal(slot) - 100) > 0.001);
+        if (badSlots.length) {
+            toast(`رقم ${badSlots.join("、")} احتمال الموضع لا يساوي 100%`);
+            return;
+        }
+        const rules = [];
+        for (let slot = 1; slot <= 5; slot++) {
+            rarityOrder.forEach(rarity => {
+                rules.push({
+                    slotNo: slot,
+                    rarity,
+                    probabilityPercent: Number(ruleMatrix[slot][rarity] || 0)
+                });
+            });
+        }
+        await request(`/admin/card-draw/slot-rules?poolId=${selectedRulePool.id}`, {
+            method: "PUT",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({rules})
+        });
+        toast("تم حفظ الاحتمالات");
+        await showRules(selectedRulePool.id);
+    }
+
+    function buildQuery() {
+        const params = new URLSearchParams();
+        params.set("poolVersion", $("poolVersion").value.trim() || "v1");
+        if ($("statusFilter").value) params.set("status", $("statusFilter").value);
+        if ($("rarityFilter").value) params.set("rarity", $("rarityFilter").value);
+        if ($("keyword").value.trim()) params.set("keyword", $("keyword").value.trim());
+        return params.toString();
+    }
+
+    async function loadCards() {
+        cards = await request(`/admin/cards?${buildQuery()}`);
+        renderStats();
+        renderRows();
+    }
+
+    function renderStats() {
+        const counts = {
+            total: cards.length,
+            online: cards.filter(card => card.status === "ONLINE").length,
+            offline: cards.filter(card => card.status === "OFFLINE").length,
+            draft: cards.filter(card => card.status === "DRAFT").length
+        };
+        const rarityStats = rarityOrder.map(rarity => `${rarity} ${cards.filter(card => card.rarity === rarity).length}`).join(" / ");
+        $("stats").innerHTML = [
+            ["النتائج الحالية", counts.total],
+            ["متاح", counts.online],
+            ["غير متاح", counts.offline],
+            ["مسودة", counts.draft],
+            ["الندرة", rarityStats],
+            ["مجموعة البطاقات", $("poolVersion").value.trim() || "v1"]
+        ].map(([label, value]) => `<div class="stat"><span>${label}</span><strong>${value}</strong></div>`).join("");
+    }
+
+    function renderRows() {
+        $("empty").style.display = cards.length ? "none" : "block";
+        $("cardRows").innerHTML = cards.map(card => `
+            <tr>
+                <td>${card.sortNo ?? 0}</td>
+                <td>${card.id}</td>
+                <td><strong>${card.word}</strong></td>
+                <td>${card.meaning || ""}</td>
+                <td dir="rtl">${card.arabicMeaning || ""}</td>
+                <td><span class="tag">${card.rarity}</span></td>
+                <td><span class="status ${card.status}">${statusText[card.status] || card.status}</span></td>
+                <td title="${card.imageUrl || ""}">${shortUrl(card.imageUrl)}</td>
+                <td title="${card.audioUrl || ""}">${shortUrl(card.audioUrl)}</td>
+                <td>
+                    <div class="actions">
+                        <button class="secondary" data-action="edit" data-id="${card.id}">تعديل</button>
+                        ${card.status === "ONLINE"
+                            ? `<button class="secondary danger" data-action="offline" data-id="${card.id}">غير متاح</button>`
+                            : `<button class="secondary" data-action="online" data-id="${card.id}">تفعيل</button>`}
+                    </div>
+                </td>
+            </tr>
+        `).join("");
+    }
+
+    function shortUrl(url) {
+        if (!url) return "";
+        return url.length > 42 ? `${url.slice(0, 38)}...` : url;
+    }
+
+    function openModal(card = null) {
+        $("modalTitle").textContent = card ? `تعديل البطاقة #${card.id}` : "إضافة بطاقة";
+        $("cardId").value = card?.id || "";
+        $("word").value = card?.word || "";
+        $("meaning").value = card?.meaning || "";
+        $("arabicMeaning").value = card?.arabicMeaning || "";
+        $("rarity").value = card?.rarity || "N";
+        $("status").value = card?.status || "ONLINE";
+        $("formPoolVersion").value = card?.poolVersion || $("poolVersion").value.trim() || "v1";
+        $("sortNo").value = card?.sortNo ?? "";
+        $("imageUrl").value = card?.imageUrl || "";
+        $("audioUrl").value = card?.audioUrl || "";
+        $("modal").classList.add("active");
+        $("modal").setAttribute("aria-hidden", "false");
+    }
+
+    function closeModal() {
+        $("modal").classList.remove("active");
+        $("modal").setAttribute("aria-hidden", "true");
+    }
+
+    function formPayload() {
+        return {
+            word: $("word").value.trim(),
+            meaning: $("meaning").value.trim(),
+            arabicMeaning: $("arabicMeaning").value.trim(),
+            audioUrl: $("audioUrl").value.trim(),
+            imageUrl: $("imageUrl").value.trim(),
+            rarity: $("rarity").value,
+            poolVersion: $("formPoolVersion").value.trim() || "v1",
+            sortNo: $("sortNo").value === "" ? 0 : Number($("sortNo").value),
+            status: $("status").value
+        };
+    }
+
+    async function saveCard(event) {
+        event.preventDefault();
+        const id = $("cardId").value;
+        const method = id ? "PUT" : "POST";
+        const path = id ? `/admin/cards/${id}` : "/admin/cards";
+        await request(path, {
+            method,
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(formPayload())
+        });
+        closeModal();
+        toast("تم الحفظ بنجاح");
+        await loadCards();
+    }
+
+    async function changeStatus(id, online) {
+        await request(`/admin/cards/${id}/${online ? "online" : "offline"}`, {method: "POST"});
+        toast(online ? "تم التفعيل" : "تم الإيقاف");
+        await loadCards();
+    }
+
+    async function importExcel(file) {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("poolVersion", $("poolVersion").value.trim() || "v1");
+        formData.append("skipDuplicates", $("skipDuplicates").checked ? "true" : "false");
+        const result = await request("/admin/cards/import-excel", {
+            method: "POST",
+            body: formData
+        });
+        const errorText = result.errors && result.errors.length ? `، ${result.errors.length} صفوف بها أخطاء` : "";
+        toast(`اكتمل الاستيراد: تمت إضافة ${result.createdCount} بطاقة، تم تجاوز ${result.skippedCount} بطاقة${errorText}`);
+        await loadCards();
+    }
+
+    async function uploadResource(file) {
+        if (!pendingUploadTarget) return;
+        const formData = new FormData();
+        formData.append("file", file);
+        const endpoint = pendingUploadType === "audio" ? "/admin/resources/upload-audio" : "/admin/resources/upload-image";
+        const result = await request(endpoint, {
+            method: "POST",
+            body: formData
+        });
+        $(pendingUploadTarget).value = result.url;
+        toast(`تم الرفع: تم إنشاء ${result.url}`);
+    }
+
+    async function syncLocalAudio() {
+        const result = await request("/admin/resources/sync-audio-by-word", {method: "POST"});
+        const unmatchedText = result.unmatchedFiles && result.unmatchedFiles.length ? `، ${result.unmatchedFiles.length} ملفات غير مطابقة` : "";
+        toast(`اكتملت مزامنة الصوت: تمت مطابقة ${result.matchedWordCount} كلمة، وتحديث ${result.updatedCardCount} بطاقة${unmatchedText}`);
+        await loadCards();
+    }
+
+    async function syncSeedArabic() {
+        const result = await request("/admin/cards/sync-seed-arabic", {method: "POST"});
+        toast(`اكتملت مزامنة العربية: تمت مطابقة ${result.matched} بطاقة، وتحديث ${result.updated} بطاقة`);
+        await loadCards();
+    }
+
+    $("searchBtn").addEventListener("click", () => loadCards().catch(error => toast(error.message)));
+    $("keyword").addEventListener("keydown", event => {
+        if (event.key === "Enter") loadCards().catch(error => toast(error.message));
+    });
+    $("createPoolBtn").addEventListener("click", () => savePool().catch(error => toast(error.message)));
+    $("cancelPoolEditBtn").addEventListener("click", resetPoolForm);
+    document.querySelectorAll("button[data-upload-target]").forEach(button => {
+        button.addEventListener("click", () => {
+            pendingUploadTarget = button.dataset.uploadTarget;
+            pendingUploadType = button.dataset.uploadType || "image";
+            $("resourceFile").accept = pendingUploadType === "audio" ? "audio/*,.mp3,.wav,.m4a,.aac,.ogg" : "image/*";
+            $("resourceFile").click();
+        });
+    });
+    $("poolGrid").addEventListener("click", event => {
+        const button = event.target.closest("button[data-pool-action]");
+        if (!button) return;
+        const poolId = Number(button.dataset.id);
+        const pool = pools.find(item => item.id === poolId);
+        if (!pool) return;
+        if (button.dataset.poolAction === "edit") editPool(pool);
+        if (button.dataset.poolAction === "use") {
+            $("poolVersion").value = pool.version;
+            loadCards().catch(error => toast(error.message));
+        }
+        if (button.dataset.poolAction === "rules") showRules(poolId).catch(error => toast(error.message));
+    });
+    $("closeRuleBtn").addEventListener("click", () => $("rulePanel").classList.remove("active"));
+    $("defaultRulesBtn").addEventListener("click", applyDefaultRules);
+    $("saveRulesBtn").addEventListener("click", () => saveRules().catch(error => toast(error.message)));
+    $("slotRows").addEventListener("input", event => {
+        const input = event.target.closest("input[data-slot]");
+        if (!input) return;
+        const slot = Number(input.dataset.slot);
+        const rarity = input.dataset.rarity;
+        ruleMatrix[slot][rarity] = Number(input.value || 0);
+        refreshSlotTotal(slot);
+    });
+    $("createBtn").addEventListener("click", () => openModal());
+    $("importBtn").addEventListener("click", () => $("excelFile").click());
+    $("syncArabicBtn").addEventListener("click", () => syncSeedArabic().catch(error => toast(error.message)));
+    $("syncAudioBtn").addEventListener("click", () => syncLocalAudio().catch(error => toast(error.message)));
+    $("excelFile").addEventListener("change", event => {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+        importExcel(file).catch(error => toast(error.message)).finally(() => {
+            $("excelFile").value = "";
+        });
+    });
+    $("resourceFile").addEventListener("change", event => {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+        uploadResource(file).catch(error => toast(error.message)).finally(() => {
+            $("resourceFile").value = "";
+            pendingUploadTarget = null;
+            pendingUploadType = "image";
+        });
+    });
+    $("closeBtn").addEventListener("click", closeModal);
+    $("cancelBtn").addEventListener("click", closeModal);
+    $("cardForm").addEventListener("submit", event => saveCard(event).catch(error => toast(error.message)));
+    $("cardRows").addEventListener("click", event => {
+        const button = event.target.closest("button[data-action]");
+        if (!button) return;
+        const id = Number(button.dataset.id);
+        const action = button.dataset.action;
+        if (action === "edit") {
+            const card = cards.find(item => item.id === id);
+            if (card) openModal(card);
+        }
+        if (action === "online") changeStatus(id, true).catch(error => toast(error.message));
+        if (action === "offline") changeStatus(id, false).catch(error => toast(error.message));
+    });
+
+    Promise.all([loadDefaultRules(), loadPools(), loadCards()]).catch(error => toast(error.message));
+</script>
+</body>
+</html>

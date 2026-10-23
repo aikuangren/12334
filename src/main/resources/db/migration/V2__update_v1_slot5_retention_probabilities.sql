@@ -1,0 +1,16 @@
+-- Intentionally no-op.
+--
+-- This migration previously targeted card_pool.version = 'v1' and overwrote
+-- slot 5 rules. card_pool.version is admin-editable, so using it in a
+-- production data migration can silently update the wrong pool or miss the
+-- intended historical pool.
+--
+-- The confirmed default/static probabilities are:
+-- slot 1: R 95%, SR 5%
+-- slot 2: R 95%, SR 5%
+-- slot 3: R 95%, SR 5%
+-- slot 4: R 40%, SR 58%, SSR 2%
+-- slot 5: SR 98%, SSR 1%, UR 0.5%, LR 0.3%, XR 0.2%
+--
+-- Existing production pools should be updated through the admin UI or an
+-- environment-specific reviewed SQL script after confirming the exact pool id.

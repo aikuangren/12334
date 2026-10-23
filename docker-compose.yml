@@ -1,0 +1,9 @@
+services:
+  card-draw-backend:
+    build: .
+    container_name: card-draw-backend
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: default
+
